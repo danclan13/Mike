@@ -18,7 +18,10 @@ fn main() -> Result<(), Box<dyn Error>> {
     //let mut pidx = Pid::new(2.50, 0.005, 0.02, 97.0, 97.0, 97.0, 97.0, 0.0);
 
     loop {
-        for x in 1..100 {
+        for x in 1..1000 {
+            if x > 900 {
+                break;
+            }
         thread::sleep(Duration::from_millis(10));
 
         let s = uart.read_line().unwrap_or_default();
@@ -42,7 +45,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         //let mut vx = outputx.output;
 
         
-        let mut v = 20.0;
+        let mut v = 50.0;
 
  
         let v1 = v*(angle1.cos())+80.0;
