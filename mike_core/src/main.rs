@@ -49,8 +49,8 @@ fn main() -> Result<(), Box<dyn Error>> {
 
  
         //let v1 = v*(angle1.cos())+80.0;
-        let v1 = 80.0;
-        let v2 = 140.0;
+        let v1 = 100.0;
+        let v2 = 100.0;
         let v3 = 100.0;
 
         //let v2 = v*(angle2.cos())+80.0;
