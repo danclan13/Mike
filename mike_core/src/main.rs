@@ -48,9 +48,13 @@ fn main() -> Result<(), Box<dyn Error>> {
         let mut v = 50.0;
 
  
-        let v1 = v*(angle1.cos())+80.0;
-        let v2 = v*(angle2.cos())+80.0;
-        let v3 = -1.0*v*(angle3.cos())+80.0;
+        //let v1 = v*(angle1.cos())+80.0;
+        let v1 = 80.0;
+        let v2 = 140.0;
+        let v3 = 100.0;
+
+        //let v2 = v*(angle2.cos())+80.0;
+        //let v3 = -1.0*v*(angle3.cos())+80.0;
         
         let mut buffer_w = [251,v1 as u8,252,v2 as u8,253,v3 as u8,0xA,0xD];  // needs a flush
         i2c.block_write(0x01, &mut buffer_w).unwrap_or_default();
