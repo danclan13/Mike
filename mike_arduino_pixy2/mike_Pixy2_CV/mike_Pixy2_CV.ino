@@ -16,7 +16,7 @@
 bool Go_For_bridge_and_hill = false;
 
 #include <Pixy2.h>
-
+#include <avr/pgmspace.h>
 Pixy2 pixy;
 
 // function prototypes
@@ -50,7 +50,7 @@ uint16_t Pan_Default = 500;
 // needs to be adjusted on competition day
 
 // serial varibles
-char buf[128];
+char buf[256];
 char ringbuff[256];
 uint8_t readpos = 0;
 uint8_t writepos = 0;
@@ -59,9 +59,22 @@ bool lineavailable = false;
 
 
 bool greenNotFound = true;
-
+const char helpmenu1[] PROGMEM = "\n\tsetmode - set current mode\n\tgetmode - get current mode\n";
+const char helpmenu2[] PROGMEM = "modes:\n\t0: Stop/Reset all\n\t1: Drive until intersection is between 40 and 45 on y axis\n\t";
+const char helpmenu3[] PROGMEM = "2: Drive sideways to hit button\n\t3: Drive sideways to find intersection again\n\t4: Wait for traffic light to turn green\n\t";
+const char helpmenu4[] PROGMEM = "5:Find intersection and turn right\n\t6: Follow line to bridge\n\t7: Deploy arm to retreive bridge\n\t8: Retrieve bridge\n\t";
+const char helpmenu5[] PROGMEM = "9: Drive sideways to verify bridge is up - if not jump to 17 at end\n\t10: Drive forward to junction turn right - If intention is to get both the bridge and the hill, jump to 17 at end\n\t";
+const char helpmenu6[] PROGMEM = "11: Follow path until button can be seen\n\t12: Rotate to face roundabout center, take IMU reading\n\t13: Track roundabout center\n\t14: Wait for IMU to take reading within 90° of original\n\t";
+const char helpmenu7[] PROGMEM = "15: Follow line towards button\n\t16: Press button -- End of program -> jump to 0\n\t17: Rotate 180° and follow line to junction\n\t18: take right at junction\n\t";
+const char helpmenu8[] PROGMEM = "19: If needed, rotate 180° to climb hill\n\t20: Take imu reading of angle to keep track of incline\n\t21: follow ine up hill, if rotated 180° drive backwards\n\t";
+const char helpmenu9[] PROGMEM = "22: Take IMU reading to know if on top of hill, if needed turn 180°\n\t23: Take IMU reading to know if on bottom of hill, rotate 180° if needed\n\t24: Jump to 11\n\t101: debug linemode\n\t102: debug ccc mode";
+const char *const helpmenu[] PROGMEM = {helpmenu1, helpmenu2, helpmenu3, helpmenu4, helpmenu5, helpmenu6, helpmenu7, helpmenu8, helpmenu9};
+      
 void loop()
 {
+  
+  delay(200); // used to reduce amount of data sent
+  
   int8_t i;
   if(Serial.available()){
     ringbuff[writepos] = Serial.read();
@@ -78,14 +91,37 @@ void loop()
     }
     lineavailable = false;
 
-    if(strstr(read,"setmode")!=NULL|strstr(read,"SetMode")!=NULL|strstr(read,"setMode")!=NULL){
-      char num[2] = {read[8],read[9]};
+    if(strstr(read,"setmode")!=NULL|strstr(read,"Setmode")!=NULL|strstr(read,"SetMode")!=NULL|strstr(read,"setMode")!=NULL){
+      char num[3];
+      i=0;
+      while(read[i]!=' ') i++;
+      i++;
+      for(j=0;j<3;j++){
+        if(read[i]>='0'&&read[i]<='9')
+          num[j] = read[i];
+        else
+          num[j] = 0;
+        i++;
+      }
       setMode(atoi(num)); 
+    }
+    if(strstr(read,"getmode")!=NULL|strstr(read,"Getmode")!=NULL|strstr(read,"GetMode")!=NULL|strstr(read,"getMode")!=NULL){
+      sprintf(buf,"Current mode is: %d\n", mode);
+      Serial.print(buf);
+    }
+    if(strstr(read,"help")!=NULL|strstr(read,"Help")!=NULL|strstr(read,"HELP")!=NULL){
+      sprintf(buf,"Current mode is: %d\n", mode);
+      Serial.print(buf);
+  
+  for (int i = 0; i < 9; i++) {
+    strcpy_P(buf, (char *)pgm_read_word(&(helpmenu[i])));  // Necessary casts and dereferencing, just copy.
+    Serial.print(buf);
+    delay(100);
+  }
     }
   }
   pixy.line.getAllFeatures();
 
-  
   switch (mode) {
    case 0:        // Stop, wait for button input, reset all parameters
     // do nothing
@@ -97,6 +133,7 @@ void loop()
    case 1:        // Drive until intersection is between 40 and 45 on y axis
     // drive forward until intersection is between y=40 and y=45
       waitForIntersection();
+      waitForIntersection_lower_center();
       setMode(2);
     break;
 
@@ -189,7 +226,7 @@ void loop()
     break;
 
 
-   case 16:       // Press button -------------------------- End of program -> jump to 0
+   case 16:       // Press button -- End of program -> jump to 0
     // identfy end of line
     // move until end of line is aprox Y=45
     setMode(0);
@@ -235,6 +272,13 @@ void loop()
 
    case 24:       // Jump to 11
     break;
+    
+   case 101:      // debug line mode
+    debug_line();
+    break;
+    
+   case 102:      // debug line mode
+    break;
    
    default:
     break;
@@ -252,7 +296,31 @@ void waitForIntersection(){
     pixy.line.getAllFeatures();
   }
 }
-
+void waitForIntersection_lower_center(){
+  while(pixy.line.intersections[0].m_x < 34 || pixy.line.intersections[0].m_x > 44 || pixy.line.intersections[0].m_y < 43 || pixy.line.intersections[0].m_y > 47 ){
+    pixy.line.getAllFeatures();
+    if(pixy.line.intersections[0].m_x < 34 || pixy.line.intersections[0].m_x > 44 ){ // if x value is not in range
+      if(pixy.line.intersections[0].m_x < 34){
+        drive(90,10);    
+      }
+      else
+      {
+        drive(-90,10);
+      }
+    }
+    else
+    {
+       if(pixy.line.intersections[0].m_y < 43){
+        drive(0,10);    
+      }
+      else
+      {
+        drive(180,10);
+      }
+    }
+      
+  }
+}
   
 // Halts the program until green is detected (signature id 3)
 void waitForGreen(){
@@ -335,8 +403,15 @@ void setMode(int sm){
     Serial.print(buf);
 }
 
-// original code from example
-void original(){
+
+//
+void drive(uint16_t deg, int spd){
+  sprintf(buf,"Driving to %d° at %d speed\n",deg,spd);
+  Serial.print(buf);
+}
+
+// debugging code
+void debug_line(){
   int8_t i;
   // print all vectors
   for (i=0; i<pixy.line.numVectors; i++)
