@@ -1,0 +1,3 @@
+(fp_lib_table
+  (lib (name mike_pcb_motors)(type KiCad)(uri ${KIPRJMOD}/mike_pcb_motors.pretty)(options "")(descr ""))
+)

@@ -1,3 +1,0 @@
-(sym_lib_table
-  (lib (name LMR)(type Legacy)(uri ${KIPRJMOD}/LMR.lib)(options "")(descr ""))
-)

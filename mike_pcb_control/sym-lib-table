@@ -1,0 +1,4 @@
+(sym_lib_table
+  (lib (name mike_pcb_control)(type Legacy)(uri ${KIPRJMOD}/mike_pcb_control.lib)(options "")(descr ""))
+  (lib (name mike_pcb_control-rescue)(type Legacy)(uri ${KIPRJMOD}/mike_pcb_control-rescue.lib)(options "")(descr ""))
+)
