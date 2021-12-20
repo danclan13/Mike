@@ -1,0 +1,5 @@
+(sym_lib_table
+  (lib (name mike_pcb_motors)(type Legacy)(uri ${KIPRJMOD}/mike_pcb_motors.lib)(options "")(descr ""))
+  (lib (name mike_pcb_motors-rescue)(type Legacy)(uri ${KIPRJMOD}/mike_pcb_motors-rescue.lib)(options "")(descr ""))
+  (lib (name mike_pcb_control-rescue)(type Legacy)(uri C:/Users/D/Documents/GitHub/Mike/mike_pcb_control/mike_pcb_control-rescue.lib)(options "")(descr ""))
+)

@@ -1,0 +1,319 @@
+EESchema Schematic File Version 4
+EELAYER 30 0
+EELAYER END
+$Descr A4 11693 8268
+encoding utf-8
+Sheet 1 1
+Title ""
+Date ""
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Comp
+L MCU_Module:Arduino_Nano_v3.x A2
+U 1 1 60EADBCC
+P 6750 2750
+F 0 "A2" H 6750 1661 50  0000 C CNN
+F 1 "Arduino_Nano_v3.x" H 6750 1570 50  0000 C CNN
+F 2 "Module:Arduino_Nano" H 6750 2750 50  0001 C CIN
+F 3 "http://www.mouser.com/pdfdocs/Gravitech_Arduino_Nano3_0.pdf" H 6750 2750 50  0001 C CNN
+	1    6750 2750
+	1    0    0    -1  
+$EndComp
+$Comp
+L Connector:Raspberry_Pi_2_3 J4
+U 1 1 60EB7021
+P 4500 2600
+F 0 "J4" H 4500 4081 50  0000 C CNN
+F 1 "Raspberry_Pi_2_3" H 4500 3990 50  0000 C CNN
+F 2 "mike_pcb_control:RasPi0,2,3-Header-upside_down" H 4500 2600 50  0001 C CNN
+F 3 "https://www.raspberrypi.org/documentation/hardware/raspberrypi/schematics/rpi_SCH_3bplus_1p0_reduced.pdf" H 4500 2600 50  0001 C CNN
+	1    4500 2600
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR0101
+U 1 1 60EC35BF
+P 4800 3900
+F 0 "#PWR0101" H 4800 3650 50  0001 C CNN
+F 1 "GND" H 4805 3727 50  0000 C CNN
+F 2 "" H 4800 3900 50  0001 C CNN
+F 3 "" H 4800 3900 50  0001 C CNN
+	1    4800 3900
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR0102
+U 1 1 60EC421B
+P 7200 3750
+F 0 "#PWR0102" H 7200 3500 50  0001 C CNN
+F 1 "GND" H 7205 3577 50  0000 C CNN
+F 2 "" H 7200 3750 50  0001 C CNN
+F 3 "" H 7200 3750 50  0001 C CNN
+	1    7200 3750
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	7200 3750 6850 3750
+Connection ~ 6850 3750
+Wire Wire Line
+	6850 3750 6750 3750
+Wire Wire Line
+	4800 3900 4700 3900
+Connection ~ 4800 3900
+Connection ~ 4200 3900
+Wire Wire Line
+	4200 3900 4100 3900
+Connection ~ 4300 3900
+Wire Wire Line
+	4300 3900 4200 3900
+Connection ~ 4400 3900
+Wire Wire Line
+	4400 3900 4300 3900
+Connection ~ 4500 3900
+Wire Wire Line
+	4500 3900 4400 3900
+Connection ~ 4600 3900
+Wire Wire Line
+	4600 3900 4500 3900
+Connection ~ 4700 3900
+Wire Wire Line
+	4700 3900 4600 3900
+$Comp
+L mike_pcb_control-rescue:LLC-4channel-LMR U3
+U 1 1 60EC984B
+P 6350 5550
+F 0 "U3" H 6350 6015 50  0000 C CNN
+F 1 "LLC-4channel" H 6350 5924 50  0000 C CNN
+F 2 "mike_pcb_control:LLC-4channel" H 6350 5950 50  0001 C CNN
+F 3 "" H 6350 5950 50  0001 C CNN
+	1    6350 5550
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR0104
+U 1 1 60ECB436
+P 6750 5650
+F 0 "#PWR0104" H 6750 5400 50  0001 C CNN
+F 1 "GND" V 6755 5522 50  0000 R CNN
+F 2 "" H 6750 5650 50  0001 C CNN
+F 3 "" H 6750 5650 50  0001 C CNN
+	1    6750 5650
+	0    -1   -1   0   
+$EndComp
+$Comp
+L power:GND #PWR0105
+U 1 1 60ECBB84
+P 5950 5650
+F 0 "#PWR0105" H 5950 5400 50  0001 C CNN
+F 1 "GND" V 5955 5522 50  0000 R CNN
+F 2 "" H 5950 5650 50  0001 C CNN
+F 3 "" H 5950 5650 50  0001 C CNN
+	1    5950 5650
+	0    1    1    0   
+$EndComp
+$Comp
+L power:+5V #PWR0106
+U 1 1 60ECD2BE
+P 4050 1300
+F 0 "#PWR0106" H 4050 1150 50  0001 C CNN
+F 1 "+5V" H 4065 1473 50  0000 C CNN
+F 2 "" H 4050 1300 50  0001 C CNN
+F 3 "" H 4050 1300 50  0001 C CNN
+	1    4050 1300
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4050 1300 4300 1300
+Connection ~ 4300 1300
+Wire Wire Line
+	4300 1300 4400 1300
+$Comp
+L power:+3.3V #PWR0107
+U 1 1 60ECE1CF
+P 4950 1300
+F 0 "#PWR0107" H 4950 1150 50  0001 C CNN
+F 1 "+3.3V" H 4965 1473 50  0000 C CNN
+F 2 "" H 4950 1300 50  0001 C CNN
+F 3 "" H 4950 1300 50  0001 C CNN
+	1    4950 1300
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4600 1300 4700 1300
+Connection ~ 4700 1300
+Wire Wire Line
+	4700 1300 4950 1300
+$Comp
+L power:+5V #PWR0108
+U 1 1 60ECED1C
+P 6650 1750
+F 0 "#PWR0108" H 6650 1600 50  0001 C CNN
+F 1 "+5V" H 6665 1923 50  0000 C CNN
+F 2 "" H 6650 1750 50  0001 C CNN
+F 3 "" H 6650 1750 50  0001 C CNN
+	1    6650 1750
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:+3.3V #PWR0110
+U 1 1 60ECFA78
+P 5950 5550
+F 0 "#PWR0110" H 5950 5400 50  0001 C CNN
+F 1 "+3.3V" V 5965 5678 50  0000 L CNN
+F 2 "" H 5950 5550 50  0001 C CNN
+F 3 "" H 5950 5550 50  0001 C CNN
+	1    5950 5550
+	0    -1   -1   0   
+$EndComp
+$Comp
+L power:+5V #PWR0111
+U 1 1 60ED0884
+P 6750 5550
+F 0 "#PWR0111" H 6750 5400 50  0001 C CNN
+F 1 "+5V" V 6765 5678 50  0000 L CNN
+F 2 "" H 6750 5550 50  0001 C CNN
+F 3 "" H 6750 5550 50  0001 C CNN
+	1    6750 5550
+	0    1    1    0   
+$EndComp
+Text GLabel 3700 1700 0    50   Input ~ 0
+TX3V3
+Text GLabel 3700 1800 0    50   Input ~ 0
+RX3V3
+Text GLabel 5950 5750 0    50   Input ~ 0
+TX3V3
+Text GLabel 5950 5850 0    50   Input ~ 0
+RX3V3
+Text GLabel 6750 5750 2    50   Input ~ 0
+RX5V
+Text GLabel 6750 5850 2    50   Input ~ 0
+TX5V
+$Comp
+L mike_pcb_control-rescue:Adafruit_Feather_Pinout-LMR U4
+U 1 1 60EDAB3E
+P 8500 2000
+F 0 "U4" H 9300 2387 60  0000 C CNN
+F 1 "Adafruit_Feather_Pinout" H 9300 2281 60  0000 C CNN
+F 2 "mike_pcb_control:Adafruit_Feather_Pinout" H 9300 2240 60  0001 C CNN
+F 3 "" H 8500 2000 60  0000 C CNN
+	1    8500 2000
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR0113
+U 1 1 60EE30E4
+P 8500 2300
+F 0 "#PWR0113" H 8500 2050 50  0001 C CNN
+F 1 "GND" V 8505 2172 50  0000 R CNN
+F 2 "" H 8500 2300 50  0001 C CNN
+F 3 "" H 8500 2300 50  0001 C CNN
+	1    8500 2300
+	0    1    1    0   
+$EndComp
+Text GLabel 10100 3500 2    50   Input ~ 0
+SDA_IMU
+Text GLabel 10100 3400 2    50   Input ~ 0
+SCL_IMU
+Text GLabel 7250 3250 2    50   Input ~ 0
+SCL_IMU
+Text GLabel 7250 3150 2    50   Input ~ 0
+SDA_IMU
+Text GLabel 5300 2100 2    50   Input ~ 0
+SCL3V3
+Text GLabel 5300 2000 2    50   Input ~ 0
+SDA3V3
+$Comp
+L power:+3.3VA #PWR0125
+U 1 1 60F0C474
+P 8500 2100
+F 0 "#PWR0125" H 8500 1950 50  0001 C CNN
+F 1 "+3.3VA" V 8515 2227 50  0000 L CNN
+F 2 "" H 8500 2100 50  0001 C CNN
+F 3 "" H 8500 2100 50  0001 C CNN
+	1    8500 2100
+	0    -1   -1   0   
+$EndComp
+$Comp
+L power:+3.3VA #PWR0126
+U 1 1 60F0CB1B
+P 6850 1750
+F 0 "#PWR0126" H 6850 1600 50  0001 C CNN
+F 1 "+3.3VA" H 6865 1923 50  0000 C CNN
+F 2 "" H 6850 1750 50  0001 C CNN
+F 3 "" H 6850 1750 50  0001 C CNN
+	1    6850 1750
+	1    0    0    -1  
+$EndComp
+Text GLabel 5950 5350 0    50   Input ~ 0
+SCL3V3
+Text GLabel 5950 5450 0    50   Input ~ 0
+SDA3V3
+Text GLabel 6750 5450 2    50   Input ~ 0
+SCL5V
+Text GLabel 6750 5350 2    50   Input ~ 0
+SDA5V
+$Comp
+L Connector:Conn_01x06_Male J1
+U 1 1 61C0C03A
+P 2050 3900
+F 0 "J1" H 2158 4281 50  0000 C CNN
+F 1 "Conn_01x06_Male" H 2158 4190 50  0000 C CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_1x06_P2.54mm_Vertical" H 2050 3900 50  0001 C CNN
+F 3 "~" H 2050 3900 50  0001 C CNN
+	1    2050 3900
+	1    0    0    -1  
+$EndComp
+Text GLabel 2250 3700 2    50   Input ~ 0
+SCL5V
+Text GLabel 2250 3800 2    50   Input ~ 0
+SDA5V
+$Comp
+L power:GND #PWR0103
+U 1 1 61C0D78B
+P 2250 4000
+F 0 "#PWR0103" H 2250 3750 50  0001 C CNN
+F 1 "GND" V 2250 3800 50  0000 C CNN
+F 2 "" H 2250 4000 50  0001 C CNN
+F 3 "" H 2250 4000 50  0001 C CNN
+	1    2250 4000
+	0    -1   -1   0   
+$EndComp
+$Comp
+L power:GND #PWR0109
+U 1 1 61C0DB9E
+P 2250 3900
+F 0 "#PWR0109" H 2250 3650 50  0001 C CNN
+F 1 "GND" V 2250 3700 50  0000 C CNN
+F 2 "" H 2250 3900 50  0001 C CNN
+F 3 "" H 2250 3900 50  0001 C CNN
+	1    2250 3900
+	0    -1   -1   0   
+$EndComp
+$Comp
+L power:+5V #PWR0112
+U 1 1 61C0EA43
+P 2250 4200
+F 0 "#PWR0112" H 2250 4050 50  0001 C CNN
+F 1 "+5V" V 2250 4400 50  0000 C CNN
+F 2 "" H 2250 4200 50  0001 C CNN
+F 3 "" H 2250 4200 50  0001 C CNN
+	1    2250 4200
+	0    1    1    0   
+$EndComp
+$Comp
+L power:+5V #PWR0114
+U 1 1 61C0EDFB
+P 2250 4100
+F 0 "#PWR0114" H 2250 3950 50  0001 C CNN
+F 1 "+5V" V 2250 4300 50  0000 C CNN
+F 2 "" H 2250 4100 50  0001 C CNN
+F 3 "" H 2250 4100 50  0001 C CNN
+	1    2250 4100
+	0    1    1    0   
+$EndComp
+$EndSCHEMATC
