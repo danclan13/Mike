@@ -83,9 +83,17 @@ const char helpmenu7[] PROGMEM = "15: Follow line towards button\n\t16: Press bu
 const char helpmenu8[] PROGMEM = "19: If needed, rotate 180° to climb hill\n\t20: Take imu reading of angle to keep track of incline\n\t21: follow ine up hill, if rotated 180° drive backwards\n\t";
 const char helpmenu9[] PROGMEM = "22: Take IMU reading to know if on top of hill, if needed turn 180°\n\t23: Take IMU reading to know if on bottom of hill, rotate 180° if needed\n\t24: Jump to 11\n\t101: debug linemode\n\t102: debug ccc mode";
 const char *const helpmenu[] PROGMEM = {helpmenu1, helpmenu2, helpmenu3, helpmenu4, helpmenu5, helpmenu6, helpmenu7, helpmenu8, helpmenu9};
+const char string_curmode[] PROGMEM = "Current mode is: %d\n";
+const char string_WaitForLight[] PROGMEM = "Waiting for light\n";
+const char string_RED[] PROGMEM = "RED\n";
+const char string_YELLOW[] PROGMEM = "YELLOW\n";
+const char string_GREEN[] PROGMEM = "GREEN\n";
 
 const char string_setmode[] PROGMEM = "setmode"; 
 
+
+int8_t i;
+//    
 void setup()
 {
   Serial.begin(115200);
@@ -103,7 +111,7 @@ void loop()
 {
 
   delay(10); // used to reduce amount of data sent
-  int8_t i;
+ 
   if (Serial.available()) {
     ringbuff[writepos] = Serial.read();
     if (ringbuff[writepos] == 0x0A)
@@ -121,6 +129,7 @@ void loop()
       // do nothing
       // change camera tilt to line following setpoint
       pixy.setServos(Pan_Default, Tilt_Linemode);
+      greenNotFound = true;
       break;
 
 
@@ -326,7 +335,6 @@ void waitForIntersection_lower_center() {
 
 // Halts the program until green is detected (signature id 3)
 void waitForGreen() {
-  int8_t i;
   setCameraMode(1); // set the camera to ccc mode and reduce brightness
   while (greenNotFound) {
     if (Serial.available())
@@ -338,14 +346,17 @@ void waitForGreen() {
       //sprintf(buf, "Block signature %d: ", i);
       //Serial.print(buf);
       //pixy.ccc.blocks[i].print();
-      if (pixy.ccc.blocks[i].m_signature == 1)
-        Serial.print("RED\n");
-      if (pixy.ccc.blocks[i].m_signature == 2)
-        Serial.print("YELLOW\n");
+      if (pixy.ccc.blocks[i].m_signature == 1){
+        Serial.print("R");
+      }
+      if (pixy.ccc.blocks[i].m_signature == 2){
+        Serial.print("Y");
+      }
       if (pixy.ccc.blocks[i].m_signature == 3) {
         greenNotFound = false;
-        Serial.print("GREEN\n");
+        Serial.print("G");
       }
+      
     }
   }
   setBrightness(0); // set brightness to default
@@ -407,7 +418,6 @@ void setMode(int sm) {
 }
 
 void serial_parse() {
-  int i;
   uint8_t j = 0;
   while (readpos != writepos) {
     read[j] = ringbuff[readpos];
@@ -432,11 +442,11 @@ void serial_parse() {
     setMode(atoi(num));
   }
   else if (strstr(read, "getmode") != NULL | strstr(read, "Getmode") != NULL | strstr(read, "GetMode") != NULL | strstr(read, "getMode") != NULL) {
-    sprintf(buf, "Current mode is: %d\n", mode);
+    sprintf(buf, (char *)pgm_read_word(&string_curmode), mode);
     Serial.print(buf);
   }
   else if (strstr(read, "help") != NULL | strstr(read, "Help") != NULL | strstr(read, "HELP") != NULL) {
-    sprintf(buf, "Current mode is: %d\n", mode);
+    sprintf(buf, (char *)pgm_read_word(&(string_curmode)), mode);
     Serial.print(buf);
     for (int i = 0; i < 9; i++) {
       strcpy_P(buf, (char *)pgm_read_word(&(helpmenu[i])));  // Necessary casts and dereferencing, just copy.
@@ -461,93 +471,35 @@ void serial_parse() {
     val = atoi(num);
     if (strstr(read, "def") != NULL) {
       readval = eeprom_write16(ADDR_P_DEF, val);
-      //        EEPROM.write(ADDR_P_DEF , val>>8 & 0xff);
-      //        EEPROM.write(ADDR_P_DEF+1 , val & 0xff);
-      //        delay(100);
-      //        readval = (EEPROM.read(ADDR_P_DEF)<<8) + EEPROM.read(ADDR_P_DEF+1);
-//      sprintf(buf, "set default pan to val %d", readval);
-//      Serial.print(buf);
     }
     else if (strstr(read, "lin") != NULL) {
       readval = eeprom_write16(ADDR_P_LIN, val);
-      //        EEPROM.write(ADDR_P_LIN , val>>8 & 0xff);
-      //        EEPROM.write(ADDR_P_LIN+1 , val & 0xff);
-      //        delay(100);
-      //        readval = (EEPROM.read(ADDR_P_LIN)<<8) + EEPROM.read(ADDR_P_LIN+1);
-//      sprintf(buf, "set linemode pan to val %d", readval);
-//      Serial.print(buf);
     }
     else if (strstr(read, "tra") != NULL) {
       readval = eeprom_write16(ADDR_P_TRA, val);
-      //        EEPROM.write(ADDR_P_TRA , val>>8 & 0xff);
-      //        EEPROM.write(ADDR_P_TRA+1 , val & 0xff);
-      //        delay(100);
-      //        readval = (EEPROM.read(ADDR_P_TRA)<<8) + EEPROM.read(ADDR_P_TRA+1);
-//      sprintf(buf, "set trafficlight pan to val %d", readval);
-//      Serial.print(buf);
     }
     else if (strstr(read, "rou") != NULL) {
       readval = eeprom_write16(ADDR_P_ROU, val);
-      //        EEPROM.write(ADDR_P_ROU , val>>8 & 0xff);
-      //        EEPROM.write(ADDR_P_ROU+1 , val & 0xff);
-      //        delay(100);
-      //        readval = (EEPROM.read(ADDR_P_ROU)<<8) + EEPROM.read(ADDR_P_ROU+1);
-//      sprintf(buf, "set roundabout pan to val %d", readval);
-//      Serial.print(buf);
     }
     else if (strstr(read, "but") != NULL) {
       readval = eeprom_write16(ADDR_P_BUT, val);
-      //        EEPROM.write(ADDR_P_BUT , val>>8 & 0xff);
-      //        EEPROM.write(ADDR_P_BUT+1 , val & 0xff);
-      //        delay(100);
-      //        readval = (EEPROM.read(ADDR_P_BUT)<<8) + EEPROM.read(ADDR_P_BUT+1);
-//      sprintf(buf, "set button pan to val %d", readval);
-//      Serial.print(buf);
     }
   }
   else if (strstr(read, "T_") != NULL) {
     if (strstr(read, "def") != NULL) {
       readval = eeprom_write16(ADDR_T_DEF, val);
-      //        EEPROM.write(ADDR_T_DEF , val>>8 & 0xff);
-      //        EEPROM.write(ADDR_T_DEF+1 , val & 0xff);
-      //        delay(100);
-      //        readval = (EEPROM.read(ADDR_T_DEF)<<8) + EEPROM.read(ADDR_T_DEF+1);
-//      sprintf(buf, "set default tilt to val %d", readval);
-//      Serial.print(buf);
     }
     else if (strstr(read, "lin") != NULL) {
       readval = eeprom_write16(ADDR_T_LIN, val);
-      //        EEPROM.write(ADDR_T_LIN , val>>8 & 0xff);
-      //        EEPROM.write(ADDR_T_LIN+1 , val & 0xff);
-      //        delay(100);
-      //        readval = (EEPROM.read(ADDR_T_LIN)<<8) + EEPROM.read(ADDR_T_LIN+1);
-//      sprintf(buf, "set linemode tilt to val %d", readval);
-//      Serial.print(buf);
     }
     else if (strstr(read, "tra") != NULL) {
       readval = eeprom_write16(ADDR_T_TRA, val);
-      //        EEPROM.write(ADDR_T_TRA , val>>8 & 0xff);
-      //        EEPROM.write(ADDR_T_TRA+1 , val & 0xff);
-      //        delay(100);
-      //        readval = (EEPROM.read(ADDR_T_TRA)<<8) + EEPROM.read(ADDR_T_TRA+1);
-//      sprintf(buf, "set traffic tilt to val %d", readval);
-//      Serial.print(buf);
     }
     else if (strstr(read, "rou") != NULL) {
       readval = eeprom_write16(ADDR_T_ROU, val);
-      //        EEPROM.write(ADDR_T_ROU , val>>8 & 0xff);
-      //        EEPROM.write(ADDR_T_ROU+1 , val & 0xff);
-      //        delay(100);
-      //        readval = (EEPROM.read(ADDR_T_ROU)<<8) + EEPROM.read(ADDR_T_ROU+1);
-//      sprintf(buf, "set roundabout tilt to val %d", readval);
-//      Serial.print(buf);
     }
     else if (strstr(read, "but") != NULL) {
       readval = eeprom_write16(ADDR_T_BUT, val);
-      //        EEPROM.write(ADDR_T_BUT , val>>8 & 0xff);
-      //        EEPROM.write(ADDR_T_BUT+1 , val & 0xff);
-//      sprintf(buf, "set button tilt to val %d", readval);
-//      Serial.print(buf);
     }
   }
   else if (strstr(read, "spd_fst") != NULL) {
@@ -564,12 +516,6 @@ void serial_parse() {
     }
     val = atoi(num);
     readval = eeprom_write16(ADDR_SPD_FST, val);
-    //        EEPROM.write(ADDR_SPD_FST , val>>8 & 0xff);
-    //        EEPROM.write(ADDR_SPD_FST+1 , val & 0xff);
-//    delay(100);
-//    readval = (EEPROM.read(ADDR_SPD_FST) << 8) + EEPROM.read(ADDR_SPD_FST + 1);
-//    sprintf(buf, "set speed fast to val %d", readval);
-//    Serial.print(buf);
   }
   else if (strstr(read, "spd_slo") != NULL) {
 
@@ -585,12 +531,6 @@ void serial_parse() {
     }
     val = atoi(num);
     readval = eeprom_write16(ADDR_SPD_SLO, val);
-    //        EEPROM.write(ADDR_SPD_SLO , val>>8 & 0xff);
-    //        EEPROM.write(ADDR_SPD_SLO+1 , val & 0xff);
-//    delay(100);
-//    readval = (EEPROM.read(ADDR_SPD_SLO) << 8) + EEPROM.read(ADDR_SPD_SLO + 1);
-//    sprintf(buf, "set speed slow to val %d", readval);
-//    Serial.print(buf);
   }
 
 }
@@ -605,6 +545,7 @@ uint16_t eeprom_write16(uint16_t addr, uint16_t val) {
   Serial.print(buf);
   return readval;
 }
+
 //
 void drive(uint16_t deg, int spd) {
   buf[0] = 'D';
@@ -637,51 +578,38 @@ void rotate(uint16_t deg, int spd) {
 // 0: horizontal
 // 1: vertical
 void follow_line(uint8_t dir) {
-  uint8_t i;
   uint8_t bestfit = 0;
-  uint8_t x0;
-  uint8_t y0;
-  uint8_t x1;
-  uint8_t y1;
   int8_t dx;
   int8_t dy;
-  int8_t dirLocal[64];
-  uint8_t DeltaDirLocal[64];
+  int8_t dirLocal[20];
+  uint8_t DeltaDirLocal[20];
   uint8_t lowestval = 45;
   pixy.line.getAllFeatures();
   for (i = 0; i < pixy.line.numVectors; i++)
   {
-    //sprintf(buf, "line %d: ", i);
-    //Serial.print(buf);
-    //pixy.line.vectors[i].print();
-
-    x0 = pixy.line.vectors[i].m_x0;
-    y0 = pixy.line.vectors[i].m_y0;
-    x1 = pixy.line.vectors[i].m_x1;
-    y1 = pixy.line.vectors[i].m_y1;
-    dx = x0 - x1;
-    dy = y0 - y1;
-    double vLength = sqrt(pow(dx, 2) + pow(dy, 2));
-    dirLocal[i] = (int8_t)(180 / 3.141592) * acos(-dx / vLength) - 90;
-    sprintf(buf, "angle %d: %d %d %d\n", i, (int)dirLocal[i], dx, dy);
+    if(i<=19){
+      dx = pixy.line.vectors[i].m_x0 - pixy.line.vectors[i].m_x1; // get difference between x coordinates
+      dy = pixy.line.vectors[i].m_y0 - pixy.line.vectors[i].m_y1; // get difference between y coordinates
+      double vLength = sqrt(pow(dx, 2) + pow(dy, 2));
+      dirLocal[i] = (int8_t)(180 / 3.141592) * acos(-dx / vLength) - 90;
+      sprintf(buf, "angle %d: %d %d %d\n", i, (int)dirLocal[i], dx, dy);
+      Serial.print(buf);
+      if (dir == 0) {
+        DeltaDirLocal[i] = 90 - abs(dirLocal[i]);
+        if (lowestval > (int) DeltaDirLocal[i]) {
+          bestfit = i;
+        }
+      }
+      else {
+        DeltaDirLocal[i] = abs(dirLocal[i]);
+        if (lowestval > (int) DeltaDirLocal[i]) {
+          bestfit = i;
+        }
+      }
+    }
+    sprintf(buf, "The best value is %d\n", (int) dirLocal[bestfit]);
     Serial.print(buf);
-
-    if (dir == 0) {
-      DeltaDirLocal[i] = 90 - abs(dirLocal[i]);
-      if (lowestval > (int) DeltaDirLocal[i]) {
-        bestfit = i;
-      }
-    }
-    else {
-      DeltaDirLocal[i] = abs(dirLocal[i]);
-      if (lowestval > (int) DeltaDirLocal[i]) {
-        bestfit = i;
-      }
-    }
-
   }
-  sprintf(buf, "The best value is %d\n", (int) dirLocal[bestfit]);
-  Serial.print(buf);
 }
 
 void Send_setmode(uint8_t modevar) {
@@ -698,7 +626,6 @@ void Send_getmode() {
 }
 // debugging code
 void debug_line() {
-  int8_t i;
   // print all vectors
   for (i = 0; i < pixy.line.numVectors; i++)
   {
