@@ -414,60 +414,60 @@ $EndComp
 $Comp
 L MCU_Module:Arduino_Nano_v3.x A2
 U 1 1 61C25545
-P 4600 2300
-F 0 "A2" H 4600 1211 50  0000 C CNN
-F 1 "Arduino_Nano_v3.x" H 4600 1120 50  0000 C CNN
-F 2 "Module:Arduino_Nano" H 4600 2300 50  0001 C CIN
-F 3 "http://www.mouser.com/pdfdocs/Gravitech_Arduino_Nano3_0.pdf" H 4600 2300 50  0001 C CNN
-	1    4600 2300
+P 4600 2250
+F 0 "A2" H 4600 1161 50  0000 C CNN
+F 1 "Arduino_Nano_v3.x" H 4600 1070 50  0000 C CNN
+F 2 "Module:Arduino_Nano" H 4600 2250 50  0001 C CIN
+F 3 "http://www.mouser.com/pdfdocs/Gravitech_Arduino_Nano3_0.pdf" H 4600 2250 50  0001 C CNN
+	1    4600 2250
 	1    0    0    -1  
 $EndComp
 $Comp
 L power:GND #PWR0101
 U 1 1 61C2554B
-P 5100 3300
-F 0 "#PWR0101" H 5100 3050 50  0001 C CNN
-F 1 "GND" H 5105 3127 50  0000 C CNN
-F 2 "" H 5100 3300 50  0001 C CNN
-F 3 "" H 5100 3300 50  0001 C CNN
-	1    5100 3300
+P 5100 3250
+F 0 "#PWR0101" H 5100 3000 50  0001 C CNN
+F 1 "GND" H 5105 3077 50  0000 C CNN
+F 2 "" H 5100 3250 50  0001 C CNN
+F 3 "" H 5100 3250 50  0001 C CNN
+	1    5100 3250
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	5100 3300 4700 3300
-Connection ~ 4700 3300
+	5100 3250 4700 3250
+Connection ~ 4700 3250
 Wire Wire Line
-	4700 3300 4600 3300
+	4700 3250 4600 3250
 $Comp
 L power:+5V #PWR0102
 U 1 1 61C25554
-P 4500 1300
-F 0 "#PWR0102" H 4500 1150 50  0001 C CNN
-F 1 "+5V" H 4515 1473 50  0000 C CNN
-F 2 "" H 4500 1300 50  0001 C CNN
-F 3 "" H 4500 1300 50  0001 C CNN
-	1    4500 1300
+P 4500 1250
+F 0 "#PWR0102" H 4500 1100 50  0001 C CNN
+F 1 "+5V" H 4515 1423 50  0000 C CNN
+F 2 "" H 4500 1250 50  0001 C CNN
+F 3 "" H 4500 1250 50  0001 C CNN
+	1    4500 1250
 	1    0    0    -1  
 $EndComp
-Text GLabel 5100 2800 2    50   Input ~ 0
+Text GLabel 5100 2750 2    50   Input ~ 0
 SCL_5V
-Text GLabel 5100 2700 2    50   Input ~ 0
+Text GLabel 5100 2650 2    50   Input ~ 0
 SDA_5V
-Text GLabel 4100 1900 0    50   Input ~ 0
+Text GLabel 4100 1850 0    50   Input ~ 0
 CraneMotor1_A
-Text GLabel 4100 2100 0    50   Input ~ 0
+Text GLabel 4100 2050 0    50   Input ~ 0
 CraneMotor2_A
-Text GLabel 4100 2500 0    50   Input ~ 0
+Text GLabel 4100 2450 0    50   Input ~ 0
 CraneMotor1_B
-Text GLabel 4100 2900 0    50   Input ~ 0
+Text GLabel 4100 2850 0    50   Input ~ 0
 CraneMotor2_B
-Text GLabel 4100 2700 0    50   Input ~ 0
+Text GLabel 4100 2650 0    50   Input ~ 0
 CraneMotor1_PWM1
-Text GLabel 4100 2800 0    50   Input ~ 0
+Text GLabel 4100 2750 0    50   Input ~ 0
 CraneMotor1_PWM2
-Text GLabel 4100 2300 0    50   Input ~ 0
+Text GLabel 4100 2250 0    50   Input ~ 0
 CraneMotor2_PWM1
-Text GLabel 4100 2600 0    50   Input ~ 0
+Text GLabel 4100 2550 0    50   Input ~ 0
 CraneMotor2_PWM2
 $Comp
 L Connector:Conn_01x06_Male J4
@@ -613,50 +613,50 @@ SDA_5V
 $Comp
 L mike_pcb_motors:SBX-DRIVER U3
 U 1 1 61C5DFC2
-P 3900 4850
-F 0 "U3" H 3800 5415 50  0000 C CNN
-F 1 "SBX-DRIVER" H 3800 5324 50  0000 C CNN
-F 2 "mike_pcb_motors:SBX-DRIVER" H 3800 5350 50  0001 C CNN
-F 3 "" H 3800 5350 50  0001 C CNN
-	1    3900 4850
+P 3900 4700
+F 0 "U3" H 3800 5265 50  0000 C CNN
+F 1 "SBX-DRIVER" H 3800 5174 50  0000 C CNN
+F 2 "mike_pcb_motors:SBX-DRIVER" H 3800 5200 50  0001 C CNN
+F 3 "" H 3800 5200 50  0001 C CNN
+	1    3900 4700
 	1    0    0    -1  
 $EndComp
-Text GLabel 4250 4900 2    50   Input ~ 0
+Text GLabel 4250 4750 2    50   Input ~ 0
 CraneMotor1_PWM1
-Text GLabel 4250 4800 2    50   Input ~ 0
+Text GLabel 4250 4650 2    50   Input ~ 0
 CraneMotor1_PWM2
-Text GLabel 4250 5300 2    50   Input ~ 0
+Text GLabel 4250 5150 2    50   Input ~ 0
 CraneMotor2_PWM1
-Text GLabel 4250 5200 2    50   Input ~ 0
+Text GLabel 4250 5050 2    50   Input ~ 0
 CraneMotor2_PWM2
-Text GLabel 3350 5000 0    50   Input ~ 0
+Text GLabel 3350 4850 0    50   Input ~ 0
 CraneMotor1_M1
-Text GLabel 3350 4900 0    50   Input ~ 0
+Text GLabel 3350 4750 0    50   Input ~ 0
 CraneMotor1_M2
-Text GLabel 3350 5200 0    50   Input ~ 0
+Text GLabel 3350 5050 0    50   Input ~ 0
 CraneMotor2_M1
-Text GLabel 3350 5100 0    50   Input ~ 0
+Text GLabel 3350 4950 0    50   Input ~ 0
 CraneMotor2_M2
 $Comp
 L power:VCC #PWR0125
 U 1 1 61C612A3
-P 4250 5000
-F 0 "#PWR0125" H 4250 4850 50  0001 C CNN
-F 1 "VCC" V 4265 5127 50  0000 L CNN
-F 2 "" H 4250 5000 50  0001 C CNN
-F 3 "" H 4250 5000 50  0001 C CNN
-	1    4250 5000
+P 4250 4850
+F 0 "#PWR0125" H 4250 4700 50  0001 C CNN
+F 1 "VCC" V 4265 4977 50  0000 L CNN
+F 2 "" H 4250 4850 50  0001 C CNN
+F 3 "" H 4250 4850 50  0001 C CNN
+	1    4250 4850
 	0    1    1    0   
 $EndComp
 $Comp
 L power:GND #PWR0126
 U 1 1 61C612A9
-P 4250 5100
-F 0 "#PWR0126" H 4250 4850 50  0001 C CNN
-F 1 "GND" V 4255 4972 50  0000 R CNN
-F 2 "" H 4250 5100 50  0001 C CNN
-F 3 "" H 4250 5100 50  0001 C CNN
-	1    4250 5100
+P 4250 4950
+F 0 "#PWR0126" H 4250 4700 50  0001 C CNN
+F 1 "GND" V 4255 4822 50  0000 R CNN
+F 2 "" H 4250 4950 50  0001 C CNN
+F 3 "" H 4250 4950 50  0001 C CNN
+	1    4250 4950
 	0    -1   -1   0   
 $EndComp
 $Comp
@@ -670,4 +670,166 @@ F 3 "" H 8700 3950 50  0001 C CNN
 	1    8800 3450
 	1    0    0    -1  
 $EndComp
+$Comp
+L power:VCC #PWR?
+U 1 1 61D47EFB
+P 9950 4400
+F 0 "#PWR?" H 9950 4250 50  0001 C CNN
+F 1 "VCC" V 9965 4527 50  0000 L CNN
+F 2 "" H 9950 4400 50  0001 C CNN
+F 3 "" H 9950 4400 50  0001 C CNN
+	1    9950 4400
+	0    -1   -1   0   
+$EndComp
+$Comp
+L power:GND #PWR?
+U 1 1 61D4856F
+P 10350 4450
+F 0 "#PWR?" H 10350 4200 50  0001 C CNN
+F 1 "GND" V 10355 4322 50  0000 R CNN
+F 2 "" H 10350 4450 50  0001 C CNN
+F 3 "" H 10350 4450 50  0001 C CNN
+	1    10350 4450
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	10250 4400 10350 4400
+Wire Wire Line
+	10350 4400 10350 4450
+$Comp
+L Device:C C?
+U 1 1 61D4B8A1
+P 10400 3800
+F 0 "C?" V 10148 3800 50  0000 C CNN
+F 1 "C" V 10239 3800 50  0000 C CNN
+F 2 "Capacitor_THT:C_Radial_D8.0mm_H7.0mm_P3.50mm" H 10438 3650 50  0001 C CNN
+F 3 "~" H 10400 3800 50  0001 C CNN
+	1    10400 3800
+	0    1    1    0   
+$EndComp
+$Comp
+L power:GND #PWR?
+U 1 1 61D4B8AD
+P 10650 3850
+F 0 "#PWR?" H 10650 3600 50  0001 C CNN
+F 1 "GND" V 10655 3722 50  0000 R CNN
+F 2 "" H 10650 3850 50  0001 C CNN
+F 3 "" H 10650 3850 50  0001 C CNN
+	1    10650 3850
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	10550 3800 10650 3800
+Wire Wire Line
+	10650 3800 10650 3850
+$Comp
+L power:+5V #PWR?
+U 1 1 61D4C0D9
+P 10150 3800
+F 0 "#PWR?" H 10150 3650 50  0001 C CNN
+F 1 "+5V" H 10165 3973 50  0000 C CNN
+F 2 "" H 10150 3800 50  0001 C CNN
+F 3 "" H 10150 3800 50  0001 C CNN
+	1    10150 3800
+	0    -1   -1   0   
+$EndComp
+Wire Wire Line
+	10150 3800 10250 3800
+$Comp
+L Device:C C?
+U 1 1 61D4E08B
+P 10100 4400
+F 0 "C?" V 9848 4400 50  0000 C CNN
+F 1 "C" V 9939 4400 50  0000 C CNN
+F 2 "Capacitor_THT:C_Radial_D8.0mm_H7.0mm_P3.50mm" H 10138 4250 50  0001 C CNN
+F 3 "~" H 10100 4400 50  0001 C CNN
+	1    10100 4400
+	0    1    1    0   
+$EndComp
+$Comp
+L Connector:Conn_01x03_Male J?
+U 1 1 61D4F0F3
+P 1550 6400
+F 0 "J?" H 1658 6681 50  0000 C CNN
+F 1 "Conn_01x03_Male" H 1658 6590 50  0000 C CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical" H 1550 6400 50  0001 C CNN
+F 3 "~" H 1550 6400 50  0001 C CNN
+	1    1550 6400
+	1    0    0    -1  
+$EndComp
+$Comp
+L Connector:Conn_01x03_Male J?
+U 1 1 61D51007
+P 3500 6400
+F 0 "J?" H 3608 6681 50  0000 C CNN
+F 1 "Conn_01x03_Male" H 3608 6590 50  0000 C CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical" H 3500 6400 50  0001 C CNN
+F 3 "~" H 3500 6400 50  0001 C CNN
+	1    3500 6400
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:+5V #PWR?
+U 1 1 61D52241
+P 3800 6400
+F 0 "#PWR?" H 3800 6250 50  0001 C CNN
+F 1 "+5V" H 3815 6573 50  0000 C CNN
+F 2 "" H 3800 6400 50  0001 C CNN
+F 3 "" H 3800 6400 50  0001 C CNN
+	1    3800 6400
+	0    1    1    0   
+$EndComp
+$Comp
+L power:GND #PWR?
+U 1 1 61D532EE
+P 3800 6500
+F 0 "#PWR?" H 3800 6250 50  0001 C CNN
+F 1 "GND" V 3805 6372 50  0000 R CNN
+F 2 "" H 3800 6500 50  0001 C CNN
+F 3 "" H 3800 6500 50  0001 C CNN
+	1    3800 6500
+	1    0    0    -1  
+$EndComp
+Text GLabel 4100 1950 0    50   Input ~ 0
+Servo_PWM1
+Text GLabel 4100 2150 0    50   Input ~ 0
+Servo_PWM2
+Text GLabel 4050 6300 2    50   Input ~ 0
+Servo_PWM2
+Wire Wire Line
+	4050 6300 3700 6300
+Wire Wire Line
+	3800 6400 3700 6400
+Wire Wire Line
+	3800 6500 3700 6500
+$Comp
+L power:+5V #PWR?
+U 1 1 61D56A50
+P 1850 6400
+F 0 "#PWR?" H 1850 6250 50  0001 C CNN
+F 1 "+5V" H 1865 6573 50  0000 C CNN
+F 2 "" H 1850 6400 50  0001 C CNN
+F 3 "" H 1850 6400 50  0001 C CNN
+	1    1850 6400
+	0    1    1    0   
+$EndComp
+$Comp
+L power:GND #PWR?
+U 1 1 61D56A56
+P 1850 6500
+F 0 "#PWR?" H 1850 6250 50  0001 C CNN
+F 1 "GND" V 1855 6372 50  0000 R CNN
+F 2 "" H 1850 6500 50  0001 C CNN
+F 3 "" H 1850 6500 50  0001 C CNN
+	1    1850 6500
+	1    0    0    -1  
+$EndComp
+Text GLabel 2100 6300 2    50   Input ~ 0
+Servo_PWM1
+Wire Wire Line
+	2100 6300 1750 6300
+Wire Wire Line
+	1850 6400 1750 6400
+Wire Wire Line
+	1850 6500 1750 6500
 $EndSCHEMATC
