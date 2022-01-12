@@ -56,7 +56,7 @@ SCL_5V
 Text GLabel 2450 2650 2    50   Input ~ 0
 SDA_5V
 $Comp
-L Connector:Conn_01x06_Male J1
+L Connector:Conn_01x06_Female J1
 U 1 1 60EE8352
 P 6500 1750
 F 0 "J1" H 6608 2131 50  0000 C CNN
@@ -64,7 +64,7 @@ F 1 "Motor1" H 6608 2040 50  0000 C CNN
 F 2 "Connector_PinHeader_2.54mm:PinHeader_1x06_P2.54mm_Vertical" H 6500 1750 50  0001 C CNN
 F 3 "~" H 6500 1750 50  0001 C CNN
 	1    6500 1750
-	1    0    0    -1  
+	-1   0    0    -1  
 $EndComp
 $Comp
 L power:+5V #PWR0112
@@ -97,7 +97,7 @@ Motor1_A
 Text GLabel 6700 1750 2    50   Input ~ 0
 Motor1_B
 $Comp
-L Connector:Conn_01x06_Male J2
+L Connector:Conn_01x06_Female J2
 U 1 1 60EED123
 P 6500 2650
 F 0 "J2" H 6608 3031 50  0000 C CNN
@@ -105,7 +105,7 @@ F 1 "Motor2" H 6608 2940 50  0000 C CNN
 F 2 "Connector_PinHeader_2.54mm:PinHeader_1x06_P2.54mm_Vertical" H 6500 2650 50  0001 C CNN
 F 3 "~" H 6500 2650 50  0001 C CNN
 	1    6500 2650
-	1    0    0    -1  
+	-1   0    0    -1  
 $EndComp
 $Comp
 L power:+5V #PWR0115
@@ -138,7 +138,7 @@ Motor2_A
 Text GLabel 6700 2650 2    50   Input ~ 0
 Motor2_B
 $Comp
-L Connector:Conn_01x06_Male J3
+L Connector:Conn_01x06_Female J3
 U 1 1 60EEDD8F
 P 6500 3550
 F 0 "J3" H 6608 3931 50  0000 C CNN
@@ -146,7 +146,7 @@ F 1 "Motor3" H 6608 3840 50  0000 C CNN
 F 2 "Connector_PinHeader_2.54mm:PinHeader_1x06_P2.54mm_Vertical" H 6500 3550 50  0001 C CNN
 F 3 "~" H 6500 3550 50  0001 C CNN
 	1    6500 3550
-	1    0    0    -1  
+	-1   0    0    -1  
 $EndComp
 $Comp
 L power:+5V #PWR0117
@@ -470,7 +470,7 @@ CraneMotor2_PWM1
 Text GLabel 4100 2550 0    50   Input ~ 0
 CraneMotor2_PWM2
 $Comp
-L Connector:Conn_01x06_Male J4
+L Connector:Conn_01x06_Female J4
 U 1 1 61C28ED1
 P 1200 4200
 F 0 "J4" H 1308 4581 50  0000 C CNN
@@ -478,7 +478,7 @@ F 1 "CraneMotorGear1" H 1308 4490 50  0000 C CNN
 F 2 "Connector_PinHeader_2.54mm:PinHeader_1x06_P2.54mm_Vertical" H 1200 4200 50  0001 C CNN
 F 3 "~" H 1200 4200 50  0001 C CNN
 	1    1200 4200
-	1    0    0    -1  
+	-1   0    0    -1  
 $EndComp
 $Comp
 L power:+5V #PWR0104
@@ -511,7 +511,7 @@ CraneMotor1_A
 Text GLabel 1400 4200 2    50   Input ~ 0
 CraneMotor1_B
 $Comp
-L Connector:Conn_01x06_Male J6
+L Connector:Conn_01x06_Female J6
 U 1 1 61C28EE7
 P 1250 5150
 F 0 "J6" H 1358 5531 50  0000 C CNN
@@ -519,7 +519,7 @@ F 1 "CraneMotorHook1" H 1358 5440 50  0000 C CNN
 F 2 "Connector_PinHeader_2.54mm:PinHeader_1x06_P2.54mm_Vertical" H 1250 5150 50  0001 C CNN
 F 3 "~" H 1250 5150 50  0001 C CNN
 	1    1250 5150
-	1    0    0    -1  
+	-1   0    0    -1  
 $EndComp
 $Comp
 L power:+5V #PWR0106
@@ -552,7 +552,7 @@ CraneMotor2_A
 Text GLabel 1450 5150 2    50   Input ~ 0
 CraneMotor2_B
 $Comp
-L Connector:Conn_01x06_Male J7
+L Connector:Conn_01x06_Female J7
 U 1 1 61C4BD88
 P 8200 5100
 F 0 "J7" H 8308 5481 50  0000 C CNN
@@ -560,7 +560,7 @@ F 1 "PCB_connector" H 8250 5400 50  0000 C CNN
 F 2 "Connector_PinHeader_2.54mm:PinHeader_1x06_P2.54mm_Vertical" H 8200 5100 50  0001 C CNN
 F 3 "~" H 8200 5100 50  0001 C CNN
 	1    8200 5100
-	1    0    0    -1  
+	-1   0    0    -1  
 $EndComp
 $Comp
 L power:+5V #PWR0108
@@ -747,7 +747,7 @@ F 3 "~" H 10100 4400 50  0001 C CNN
 	0    1    1    0   
 $EndComp
 $Comp
-L Connector:Conn_01x03_Male J8
+L Connector:Conn_01x03_Female J8
 U 1 1 61D4F0F3
 P 1550 6400
 F 0 "J8" H 1658 6681 50  0000 C CNN
@@ -755,10 +755,10 @@ F 1 "Conn_01x03_Male" H 1658 6590 50  0000 C CNN
 F 2 "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical" H 1550 6400 50  0001 C CNN
 F 3 "~" H 1550 6400 50  0001 C CNN
 	1    1550 6400
-	1    0    0    -1  
+	-1   0    0    -1  
 $EndComp
 $Comp
-L Connector:Conn_01x03_Male J9
+L Connector:Conn_01x03_Female J9
 U 1 1 61D51007
 P 3500 6400
 F 0 "J9" H 3608 6681 50  0000 C CNN
@@ -766,7 +766,7 @@ F 1 "Conn_01x03_Male" H 3608 6590 50  0000 C CNN
 F 2 "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical" H 3500 6400 50  0001 C CNN
 F 3 "~" H 3500 6400 50  0001 C CNN
 	1    3500 6400
-	1    0    0    -1  
+	-1   0    0    -1  
 $EndComp
 $Comp
 L power:+5V #PWR0137
