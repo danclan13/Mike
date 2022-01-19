@@ -38,8 +38,8 @@ FastPID PID2(Kp, Ki, Kd, Hz, 9, true);
 #define INTEG_MIN    -250
 
 //Sensor
-const int hall_11 = 2;
-const int hall_12 = 8;
+const int hall_11 = 8; // flipped
+const int hall_12 = 2; // flipped
 const int hall_21 = 4;
 const int hall_22 = 12;
 unsigned long t1, t1_updated, t2, t2_updated;
@@ -48,8 +48,8 @@ unsigned long braketime = 300000;
 unsigned rpm1, rpm2;
 
 //Driver
-const int pwm_11 = 10;
-const int pwm_12 = 11;
+const int pwm_11 = 11; // flipped
+const int pwm_12 = 10; // flipped
 const int pwm_21 = 6;
 const int pwm_22 = 9;
 const int servo_1 = 3;
@@ -244,15 +244,16 @@ void loop()
   int16_t Output2 = PID2.step(Setpoint2, Input2);
 
   motor_write(Output1, Output2);
+
+
+  }
+  
   /****************************************************************
 
        Write to motors
 
    ****************************************************************/
 
-
-
-}
 
 
 void motor_write(int16_t Output1, int16_t Output2) {
@@ -316,7 +317,6 @@ void LoadBytes(void) {
       motor[2] = i2cdata[readBufferIndex] - 80;
     }
     readBufferIndex++;
-
   }
 }
 
