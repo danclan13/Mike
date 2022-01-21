@@ -5,8 +5,9 @@
 #include <FastPID.h>
 #include <EnableInterrupt.h>
 #include <Wire.h>
+#include <Servo.h>
 
-int motor[6];
+int motor[5];
 volatile boolean rFlag = false;
 volatile byte i2cdata[256];
 uint8_t writeBufferIndex;
@@ -24,22 +25,30 @@ int sign2 = 1;
 int rcount1, rcount2;
 int dpos1, dpos2;
 int cpos1, cpos2;
+int dspeed1, dspeed2;
 
+boolean swFlag = false;
+boolean refFlag = false;
 
+Servo lServo;
+Servo rServo;
+
+int lSpos, rSpos;
 
 
 //Specify the links and initial tuning parameters
 //float Kp = 10.8, Ki = 2.6, Kd = 0.56, Hz = 100;
-float Kp = 5.0, Ki = 1.0, Kd = 0.2, Hz = 100;
-FastPID PID1(Kp, Ki, Kd, Hz, 9, true);
-FastPID PID2(Kp, Ki, Kd, Hz, 9, true);
+float Kp = 5.0, Ki = 0.5, Kd = 0.1, Hz = 100;
+FastPID PID1(Kp, Ki, Kd, Hz, 9, true);          // PID regulator for the hoist motor
+FastPID PID2(Kp, Ki, Kd, Hz, 9, true);          // Extension gear motor PID
 
 #define INTEG_MAX    250
 #define INTEG_MIN    -250
 
+
 //Sensor
-const int hall_11 = 8; // flipped
-const int hall_12 = 2; // flipped
+const int hall_11 = 8; // flipped for the hoist motor
+const int hall_12 = 2; // flipped for the hoist motor
 const int hall_21 = 4;
 const int hall_22 = 12;
 unsigned long t1, t1_updated, t2, t2_updated;
@@ -47,9 +56,13 @@ unsigned long dt1, dt2;
 unsigned long braketime = 300000;
 unsigned rpm1, rpm2;
 
+
+//Micro switch
+const int mc_sw = 7;
+
 //Driver
-const int pwm_11 = 11; // flipped
-const int pwm_12 = 10; // flipped
+const int pwm_11 = 11; // flipped for the hoist motor
+const int pwm_12 = 10; // flipped for the hoist motor
 const int pwm_21 = 6;
 const int pwm_22 = 9;
 const int servo_1 = 3;
@@ -58,7 +71,6 @@ int in_11;
 int in_12;
 int in_21;
 int in_22;
-
 
 
 void setup()
@@ -95,8 +107,15 @@ void setup()
   pinMode(hall_11, INPUT);
   pinMode(hall_21, INPUT);
 
+
   enableInterrupt(hall_11, interruptFunction1, RISING);
   enableInterrupt(hall_21, interruptFunction2, RISING);
+
+  pinMode(mc_sw, INPUT_PULLUP);
+  enableInterrupt(mc_sw, interruptFunction3, FALLING);
+
+  lServo.attach(servo_1);
+  rServo.attach(servo_2);
 
   writeBufferIndex = 0;
   readBufferIndex = 0;
@@ -105,17 +124,15 @@ void setup()
   rcount2 = 0;
   cpos1 = 0;
   cpos2 = 0;
-  dpos1 = 30;
-  dpos2 = 30;
+  dpos1 = 0;
+  dpos2 = 0;
 
 }
 
 void loop()
 {
   /****************************************************************
-
        begin I2C read and timeout funcitons
-
    ****************************************************************/
 
   if (rFlag == true)  // when data is availabe -> read it
@@ -126,29 +143,32 @@ void loop()
     i2ct = micros();
     Serial.print(motor[0]);
     Serial.print(",");
-    Serial.println(motor[1]);
+    Serial.print(motor[1]);
+    Serial.print(",");
+    Serial.print(motor[2]);
+    Serial.print(",");
+    Serial.print(motor[3]);
+    Serial.print(",");
+    Serial.print(motor[4]);
+    Serial.print(",");
+    Serial.println(motor[5]);
   }
 
   if ((micros() - i2ct) > i2ctimeout) // timeout for i2c signal
   {
     //Serial.println("i2c communication failed");
-    for (int i = 0; i < 3; i++) {
-      motor[i] = 0;
-    }
+    motor[1] = 0;   //zero the hoist speed if the bus is failed
+    motor[3] = 0;   //zero the jib speed if the bus is failed
     i2ct = micros();
   }
 
   /****************************************************************
-
        end I2C read and timeout funcitons
-
    ****************************************************************/
 
 
   /****************************************************************
-
-       begin changing motor setpoints
-
+       begin update crane positions
    ****************************************************************/
 
   if (abs(rcount1) > 18)
@@ -159,58 +179,84 @@ void loop()
   if (abs(rcount2) > 18)
   { cpos2 = cpos2 + rcount2 / 18;
     rcount2 = rcount2 -  (floor(rcount2 / 18)) * 18;
+  }
+
+  /****************************************************************
+     end update crane positions
+  ****************************************************************/
+
+  /****************************************************************
+      begin referencing the crane jib if not yet referenced
+  ****************************************************************/
+
+  if (refFlag == false) {
+    if (swFlag == false && digitalRead(mc_sw) == HIGH) {
+      Setpoint2 = -10;
+    }
+    if (swFlag == true || digitalRead(mc_sw) == LOW) {
+      Setpoint2 = 0;
+      cpos2 = 0;
+      refFlag = true;
+      swFlag = false;
+      //Serial.println("Crane retraction is now calibrated");
+    }
+  }
+
+  /****************************************************************
+     end referencing the crane jib if not yet referenced
+  ****************************************************************/
+
+  /****************************************************************
+     begin changing motor setpoints for reaching crane and arms positions
+  ****************************************************************/
+  else
+  {
+    dpos1 = motor[0];
+    dspeed1 = motor[1];
+    dpos2 = motor[2];
+    dspeed2 = motor[3];
+    lSpos = motor[4];
+    rSpos = motor[5];
     
-  }
 
-  Serial.print(cpos1);
-  Serial.print(",");
-  Serial.print(rcount1);
-  Serial.print(",");
-  Serial.println(rpm1);
-  if (cpos1 < dpos1) {
-    Setpoint1 = 15;
-  }
-  if (cpos1 > dpos1) {
-    Setpoint1 = -15;
-  }
-  if (cpos1 == dpos1)
-  { Setpoint1 = 0;
-    if (dpos1 > 29)     // remove after testing
-      dpos1 = 2;         // remove after testing
-    else dpos1 = 30;    // remove after testing
-  }
+    if (cpos1 < dpos1) {
+      Setpoint1 = dspeed1;
+    }
+    if (cpos1 > dpos1) {
+      Setpoint1 = -dspeed1;
+    }
+    if (cpos1 == dpos1)
+    { Setpoint1 = 0;/*
+    if (dpos1 > 29)     // comment out after testing
+      dpos1 = 2;
+    else dpos1 = 30; */
+    }
 
-  if (cpos2 < dpos2) {
-    Setpoint2 = 15;
-  }
-  if (cpos2 > dpos2) {
-    Setpoint2 = -15;
-  }
-  if (cpos2 == dpos2)
-  { Setpoint2 = 0;
-    if (dpos2 > 29)     // remove after testing
-      dpos2 = 20;         // remove after testing
-    else dpos2 = 30;    // remove after testing
-  }
+    if (cpos2 < dpos2) {
+      Setpoint2 = dspeed2;
+    }
+    if (cpos2 > dpos2) {
+      Setpoint2 = -dspeed2;
+    }
+    if (cpos2 == dpos2)
+    { Setpoint2 = 0;/*
+    if (dpos2 > 29)     // comment out remove after testing
+      dpos2 = 20;
+    else dpos2 = 30; */
+    }
 
 
 
-  //Setpoint1 = motor[0];
-  //Setpoint2 = motor[1];
-
+  }
 
   /****************************************************************
-
-       end changing motor setpoints
-
-   ****************************************************************/
+     end changing motor setpoints for reaching crane positions
+  ****************************************************************/
 
 
 
   /****************************************************************
-
        begin RPM and PID calculations
-
    ****************************************************************/
   // calculate revolutions per minute
 
@@ -245,14 +291,11 @@ void loop()
 
   motor_write(Output1, Output2);
 
+}
 
-  }
-  
-  /****************************************************************
-
-       Write to motors
-
-   ****************************************************************/
+/****************************************************************
+     Write to motors
+ ****************************************************************/
 
 
 
@@ -275,7 +318,7 @@ void motor_write(int16_t Output1, int16_t Output2) {
     in_22 = pwm_21;
   }
   else
-  { in_21 = pwm_21; 
+  { in_21 = pwm_21;
     in_22 = pwm_22;
   }
 
@@ -288,12 +331,13 @@ void motor_write(int16_t Output1, int16_t Output2) {
   analogWrite(in_21, Output2);
   analogWrite(in_22, 0);
 
+  lServo.write(lSpos);
+  rServo.write(rSpos);
+
 }
 
 /****************************************************************
-
-     begin interrupts
-
+     begin interrupts and functions
  ****************************************************************/
 
 char lastbyte;
@@ -301,20 +345,35 @@ char lastbyte2;
 void LoadBytes(void) {
   while (writeBufferIndex != readBufferIndex)
   {
-    if (i2cdata[readBufferIndex] == 251)
+    if (i2cdata[readBufferIndex] == 241)
     {
       readBufferIndex++;
-      motor[0] = i2cdata[readBufferIndex] - 80;
+      motor[0] = i2cdata[readBufferIndex];
     }
-    else if (i2cdata[readBufferIndex] == 252)
+    else if (i2cdata[readBufferIndex] == 242)
     {
       readBufferIndex++;
       motor[1] = i2cdata[readBufferIndex] - 80;
     }
-    else if (i2cdata[readBufferIndex] == 253)
+    else if (i2cdata[readBufferIndex] == 243)
     {
       readBufferIndex++;
-      motor[2] = i2cdata[readBufferIndex] - 80;
+      motor[2] = i2cdata[readBufferIndex];
+    }
+    else if (i2cdata[readBufferIndex] == 244)
+    {
+      readBufferIndex++;
+      motor[3] = i2cdata[readBufferIndex] - 80;
+    }
+    else if (i2cdata[readBufferIndex] == 245)
+    {
+      readBufferIndex++;
+      motor[4] = i2cdata[readBufferIndex];
+    }
+    else if (i2cdata[readBufferIndex] == 246)
+    {
+      readBufferIndex++;
+      motor[5] = i2cdata[readBufferIndex];
     }
     readBufferIndex++;
   }
@@ -350,8 +409,10 @@ void interruptFunction2() {
   rcount2 = rcount2 + sign2;
 }
 
+void interruptFunction3() {
+  swFlag = true;
+}
+
 /****************************************************************
-
      end interrupts
-
  ****************************************************************/
