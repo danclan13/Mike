@@ -27,6 +27,8 @@ int dpos1, dpos2;
 int cpos1, cpos2;
 int dspeed1, dspeed2;
 
+int lift_state[8];
+
 boolean swFlag = false;
 boolean refFlag = false;
 
