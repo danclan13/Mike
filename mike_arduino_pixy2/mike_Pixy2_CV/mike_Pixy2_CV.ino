@@ -47,10 +47,10 @@ int mode = 0;
 
 
 // needs to be adjusted - updated by EEPROM
-uint16_t Pan_Default = 500;
-uint16_t Tilt_Default = 500;
-uint16_t Pan_Linemode = 350;
-uint16_t Tilt_Linemode = 350;
+uint16_t Pan_Default = 370;
+uint16_t Tilt_Default = 250;
+uint16_t Pan_Linemode = 370;
+uint16_t Tilt_Linemode = 485;
 uint16_t Pan_Trafficlight = 250;
 uint16_t Tilt_Trafficlight = 250;
 uint16_t Pan_Roundabout = 125;
@@ -123,12 +123,26 @@ void loop()
     serial_parse();
   }
   pixy.line.getAllFeatures();
-
+  if(pixy.line.barcodes[0].m_code == 14){
+    mode = 0;
+  }
   switch (mode) {
     case 0:        // Stop, wait for button input, reset all parameters
       // do nothing
       // change camera tilt to line following setpoint
-      pixy.setServos(Pan_Default, Tilt_Linemode);
+      pixy.setServos(Pan_Default, Tilt_Default);
+      
+      for (i = 0; i < pixy.line.numBarcodes; i++)
+      {
+        sprintf(buf, "barcode %d: ", i);
+        Serial.print(buf);
+        pixy.line.barcodes[i].print();
+        if(pixy.line.barcodes[i].m_code==0){
+          mode = 1;
+          pixy.setServos(Pan_Default, Tilt_Linemode);
+      }
+    }
+      
       greenNotFound = true;
       break;
 
@@ -305,11 +319,19 @@ void waitForIntersection() {
   pixy.line.getAllFeatures();
   while (pixy.line.numIntersections == 0) {
     pixy.line.getAllFeatures();
+    if(pixy.line.barcodes[0].m_code == 14){
+      mode = 0;
+      break;
+    }
   }
 }
 void waitForIntersection_lower_center() {
   while (pixy.line.intersections[0].m_x < 34 || pixy.line.intersections[0].m_x > 44 || pixy.line.intersections[0].m_y < 43 || pixy.line.intersections[0].m_y > 47 ) {
-    pixy.line.getAllFeatures();
+    pixy.line.getAllFeatures(); 
+    if(pixy.line.barcodes[0].m_code == 14){
+      mode = 0;
+      break;
+    }
     if (pixy.line.intersections[0].m_x < 34 || pixy.line.intersections[0].m_x > 44 ) { // if x value is not in range
       if (pixy.line.intersections[0].m_x < 34) {
         drive(90, speed_slow);
@@ -358,6 +380,10 @@ void waitForGreen() {
       }
       
     }
+  if(pixy.line.barcodes[0].m_code == 14){
+    mode = 0;
+      break;
+  }
   }
   setBrightness(0); // set brightness to default
 }
