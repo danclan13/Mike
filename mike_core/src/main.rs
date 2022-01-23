@@ -15,10 +15,11 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut i2c = I2c::new()?;
     i2c.set_slave_address(0x53)?;
     let mut v: f64;
-
+    println!("State 1");
     //let mut pidx = Pid::new(2.50, 0.005, 0.02, 97.0, 97.0, 97.0, 97.0, 0.0);
 
     loop {
+        println!("State 2");
         for x in 1..1000 {
             if x > 900 {
                 break;
@@ -54,7 +55,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         {
 
         }}
-
+        println!("State 3");
         //let outputx = pidx.next_control_output(leaning_xpart);
         //let mut vx = outputx.output;
 
@@ -70,6 +71,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         println!("Lx: {} Vx: {}", direction, v);
         }
         loop {
+            println!("State 4");
         let mut direction = 0.0;
         let mut angle1 = PI/3.0+direction*PI/1800.0;
         let mut angle2 = PI/3.0-direction*PI/1800.0;
