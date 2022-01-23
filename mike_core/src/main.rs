@@ -35,14 +35,9 @@ fn main() -> Result<(), Box<dyn Error>> {
         let heading = vectstr[1].parse::<f64>().unwrap_or_default();
         let leaning = vectstr[2].parse::<f64>().unwrap_or_default();}}
         //let direction = vectstr[3].parse::<f64>().unwrap_or_default();
-        */
         
-        let mut direction = 0.0;
-
-        let mut angle1 = PI/3.0+direction*PI/1800.0;
-        let mut angle2 = PI/3.0-direction*PI/1800.0;
-        let mut angle3 = direction*PI/1800.0;
         
+       
         let cams = uart.read_line().unwrap_or_default();
         if cams.trim().is_empty() == false {
         let camspl = cams.trim().split(",");
@@ -55,6 +50,14 @@ fn main() -> Result<(), Box<dyn Error>> {
         {
 
         }}
+*/
+
+        let mut direction = 0.0;
+
+        let mut angle1 = PI/3.0+direction*PI/1800.0;
+        let mut angle2 = PI/3.0-direction*PI/1800.0;
+        let mut angle3 = direction*PI/1800.0;
+
         println!("State 3");
         //let outputx = pidx.next_control_output(leaning_xpart);
         //let mut vx = outputx.output;
@@ -68,7 +71,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         
         let mut buffer_w = [251,vc as u8,252,va as u8,253,vb as u8,0xA,0xD];  // needs a flush
         i2c.block_write(0x01, &mut buffer_w).unwrap_or_default();
-        println!("Lx: {} Vx: {}", direction, v);
+        //println!("Lx: {} Vx: {}", direction, v);
         }
         loop {
             println!("State 4");
