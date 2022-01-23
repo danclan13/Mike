@@ -67,22 +67,25 @@ fn main() -> Result<(), Box<dyn Error>> {
         let vc = v*(angle1.cos())+80.0;
         let va = v*(angle2.cos())+80.0;
         let vb = -1.0*v*(angle3.cos())+80.0;
+
+        print!("{} {} {}", vc,va,vb);
         
         let mut buffer_w = [251,vc as u8,252,va as u8,253,vb as u8,0xA,0xD];  // needs a flush
         i2c.block_write(0x01, &mut buffer_w).unwrap_or_default();
         println!("Lx: {} Vx: {}", direction, v);
         }
-        while(true) {
+        loop {
         let mut direction = 0.0;
         let mut angle1 = PI/3.0+direction*PI/1800.0;
         let mut angle2 = PI/3.0-direction*PI/1800.0;
         let mut angle3 = direction*PI/1800.0;
 
         
-        let mut v = 0.0;
+        v = 0.0;
         let vc = v*(angle1.cos())+80.0;
         let va = v*(angle2.cos())+80.0;
         let vb = -1.0*v*(angle3.cos())+80.0;
+        print!("{} {} {}", vc,va,vb);
         
         let mut buffer_w = [251,vc as u8,252,va as u8,253,vb as u8,0xA,0xD];  // needs a flush
         i2c.block_write(0x01, &mut buffer_w).unwrap_or_default();
