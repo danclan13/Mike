@@ -35,7 +35,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         let leaning = vectstr[2].parse::<f64>().unwrap_or_default();}}
         //let direction = vectstr[3].parse::<f64>().unwrap_or_default();
         */
-        v = 50.0;
+        
         let mut direction = 0.0;
 
         let mut angle1 = PI/3.0+direction*PI/1800.0;
@@ -63,7 +63,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
 
 
- 
+        v = 50.0;
         let vc = v*(angle1.cos())+80.0;
         let va = v*(angle2.cos())+80.0;
         let vb = -1.0*v*(angle3.cos())+80.0;
