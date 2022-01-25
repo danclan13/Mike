@@ -22,7 +22,7 @@ Adafruit_Mahony filter;  // fastest/smalleset
   Adafruit_Sensor_Calibration_SDFat cal;
 #endif
 
-#define FILTER_UPDATE_RATE_HZ 100
+#define FILTER_UPDATE_RATE_HZ 10
 #define PRINT_EVERY_N_UPDATES 1
 //#define AHRS_DEBUG_OUTPUT
 
@@ -40,7 +40,13 @@ void setup() {
 
   if (!init_sensors()) {
     Serial.println("Failed to find sensors");
-    while (1) delay(10);
+    while (1){
+      delay(100);
+      if(init_sensors()){
+        break;
+      }
+        
+    }
   }
   
   //accelerometer->printSensorDetails();
@@ -50,32 +56,27 @@ void setup() {
   setup_sensors();
   filter.begin(FILTER_UPDATE_RATE_HZ);
   timestamp = millis();
-
   Wire.setClock(400000); // 400KHz
+  Wire.begin(0x57);
+  Wire.onReceive(receiveData);
 }
 
-
-void loop() {
-  float roll, pitch, heading;
   float gx, gy, gz;
-  static uint8_t counter = 0;
-
-  if ((millis() - timestamp) < (1000 / FILTER_UPDATE_RATE_HZ)) {
-    return;
-  }
-  timestamp = millis();
-  // Read the motion sensors
+  bool readdata = false;
+void readsensors(void){
   sensors_event_t accel, gyro, mag;
   accelerometer->getEvent(&accel);
   gyroscope->getEvent(&gyro);
   magnetometer->getEvent(&mag);
+
+  
+  cal.calibrate(mag);
+  cal.calibrate(accel);
+  cal.calibrate(gyro);
 #if defined(AHRS_DEBUG_OUTPUT)
   Serial.print("I2C took "); Serial.print(millis()-timestamp); Serial.println(" ms");
 #endif
 
-  cal.calibrate(mag);
-  cal.calibrate(accel);
-  cal.calibrate(gyro);
   // Gyroscope needs to be converted from Rad/s to Degree/s
   // the rest are not unit-important
   gx = gyro.gyro.x * SENSORS_RADS_TO_DPS;
@@ -90,7 +91,24 @@ void loop() {
   Serial.print("Update took "); Serial.print(millis()-timestamp); Serial.println(" ms");
 #endif
 
-  // only print the calculated output once in a while
+ 
+}
+void loop() {
+  if(readdata == true){
+    readdata = false;
+  float roll, pitch, heading;
+  static uint8_t counter = 0;
+/*
+  if ((millis() - timestamp) < (1000 / FILTER_UPDATE_RATE_HZ)) {
+    return;
+  }
+  timestamp = millis();
+
+*/  
+  // Read the motion sensors
+  readsensors();
+
+   // only print the calculated output once in a while
   if (counter++ <= PRINT_EVERY_N_UPDATES) {
     return;
   }
@@ -173,7 +191,14 @@ Serial.print(l);
 Serial.print(",");
 Serial.print(d);
 Serial.println(",end");
-
+Wire.beginTransmission(0xff);
+Wire.write(h>>8&0xff);
+Wire.write(h&0xff);
+Wire.write(l>>8&0xff);
+Wire.write(l&0xff);
+Wire.write(d>>8&0xff);
+Wire.write(d&0xff);
+Wire.endTransmission();
   
   //float attitude, bank;
   //heading = 57.3*atan2(2.0 * (qx*qy + qz*qw),(sq(qx) - sq(qy) - sq(qz) + sq(qw)));
@@ -191,4 +216,16 @@ Serial.println(",end");
 #if defined(AHRS_DEBUG_OUTPUT)
   Serial.print("Took "); Serial.print(millis()-timestamp); Serial.println(" ms");
 #endif
+  }
+}
+
+void receiveData (int howMany){
+  for (int i = 0; i < howMany; i++)
+    {
+    byte c = Wire.read ();
+      if(c==0x1e)
+      {
+        readdata = true;
+      }
+    }  // end of for loop
 }
