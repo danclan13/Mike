@@ -13,7 +13,9 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let mut uart = Uart::new(115_200, Parity::None, 8, 1)?;
     let mut i2c = I2c::new()?;
+    let mut i2c_imu = I2c::new()?;
     i2c.set_slave_address(0x53)?;
+    i2c_imu.set_slave_address(0x57)?;
     let mut v: f64;
     println!("State 1");
     //let mut pidx = Pid::new(2.50, 0.005, 0.02, 97.0, 97.0, 97.0, 97.0, 0.0);
@@ -39,9 +41,9 @@ fn main() -> Result<(), Box<dyn Error>> {
         //let direction = vectstr[3].parse::<f64>().unwrap_or_default();
         
        
-        */ 
+        
        
-        let cams = uart.read_line().unwrap_or_default();
+        let cams = uart.read().unwrap_or_default();
         if cams.trim().is_empty() == false {
         let camspl = cams.trim().split(",");
         let camvectstr: Vec<&str> = camspl.collect();
@@ -53,6 +55,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         {
 
         }}
+        */ 
 
         let mut direction = 0.0;
 
@@ -64,15 +67,19 @@ fn main() -> Result<(), Box<dyn Error>> {
         //let outputx = pidx.next_control_output(leaning_xpart);
         //let mut vx = outputx.output;
 
-        let mut v = 50.0;
+        v = 50.0;
         let vc = v*(angle1.cos())+80.0;
         let va = v*(angle2.cos())+80.0;
         let vb = -1.0*v*(angle3.cos())+80.0;
 
         println!("{} {} {}", vc,va,vb);
         
-        let mut buffer_w = [251,vc as u8,252,va as u8,253,vb as u8,0xA,0xD];  // needs a flush
+        let mut buffer_w = [251,vc as u8,252,va as u8,253,vb as u8,0xA,0xD];
         i2c.block_write(0x01, &mut buffer_w).unwrap_or_default();
+        
+        let mut buffer_r = [0u8;3];
+        i2c_imu.block_read(0x1E,&mut buffer_r).unwrap_or_default();
+        println!("block read with length {} using command 0x1E -> {:?} ", buffer_r.len(), buffer_r);
         //println!("Lx: {} Vx: {}", direction, v);
         }
         
