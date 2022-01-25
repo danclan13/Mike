@@ -12,6 +12,7 @@ pub const PI: f64 = 3.14159265358979323846264338327950288f64;
 fn main() -> Result<(), Box<dyn Error>> {
 
     let mut uart = Uart::new(115_200, Parity::None, 8, 1)?;
+    uart.set_read_mode(0, Duration::default())?;
     let mut i2c = I2c::new()?;
     i2c.set_slave_address(0x53)?;
     let mut v: f64;
@@ -36,7 +37,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         let leaning = vectstr[2].parse::<f64>().unwrap_or_default();}}
         //let direction = vectstr[3].parse::<f64>().unwrap_or_default();
         
-        
+*/        
        
         let cams = uart.read_line().unwrap_or_default();
         if cams.trim().is_empty() == false {
@@ -50,7 +51,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         {
 
         }}
-*/
+
 
         let mut direction = 0.0;
 
