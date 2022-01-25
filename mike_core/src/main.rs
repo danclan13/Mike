@@ -37,7 +37,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         let leaning = vectstr[2].parse::<f64>().unwrap_or_default();}}
         //let direction = vectstr[3].parse::<f64>().unwrap_or_default();
         
-*/        
+       
        
         let cams = uart.read_line().unwrap_or_default();
         if cams.trim().is_empty() == false {
@@ -51,7 +51,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         {
 
         }}
-
+        */ 
 
         let mut direction = 0.0;
 
