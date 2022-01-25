@@ -22,10 +22,6 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     loop {
         println!("State 2");
-        for x in 1..100 {
-            if x > 90 {
-                break;
-            }
         thread::sleep(Duration::from_millis(1000));
         uart.set_read_mode(0, Duration::default())?;
         uart.set_write_mode(false)?;
@@ -72,42 +68,17 @@ fn main() -> Result<(), Box<dyn Error>> {
         let va = v*(angle2.cos())+80.0;
         let vb = -1.0*v*(angle3.cos())+80.0;
 
-        println!("{} {} {}", vc,va,vb);
+        //println!("{} {} {}", vc,va,vb);
         
-        let mut buffer_w = [251,vc as u8,252,va as u8,253,vb as u8,0xA,0xD];
-        i2c_imu.block_write(0x01, &mut buffer_w).unwrap_or_default();
+        //let mut buffer_w = [251,vc as u8,252,va as u8,253,vb as u8,0xA,0xD];
+        //i2c_imu.block_write(0x01, &mut buffer_w).unwrap_or_default();
 
         let mut buffer_r = [0u8;7];
         i2c_imu.block_read(0x1E,&mut buffer_r).unwrap_or_default();
         println!("block read with length {} using command 0x1E -> {:?} ", buffer_r.len(), buffer_r);
         //println!("Lx: {} Vx: {}", direction, v);
-        }
-
-        for x in 1..10 {
-            if x > 9 {
-                break;
-            }
-            thread::sleep(Duration::from_millis(2000));
-            println!("State 4");
-        let mut direction = 0.0;
-        let mut angle1 = PI/3.0+direction*PI/1800.0;
-        let mut angle2 = PI/3.0-direction*PI/1800.0;
-        let mut angle3 = direction*PI/1800.0;
-
         
-        v = 0.0;
-        let vc = v*(angle1.cos())+80.0;
-        let va = v*(angle2.cos())+80.0;
-        let vb = -1.0*v*(angle3.cos())+80.0;
-        println!("{} {} {}", vc,va,vb);
-        
-        let mut buffer_w = [251,vc as u8,252,va as u8,253,vb as u8,0xA,0xD];  // needs a flush
-        i2c_imu.block_write(0x01, &mut buffer_w).unwrap_or_default();
 
-        let mut buffer_r = [0u8;7];
-        i2c_imu.block_read(0x1E,&mut buffer_r).unwrap_or_default();
-        println!("block read with length {} using command 0x1E -> {:?} ", buffer_r.len(), buffer_r);
-        //println!("Lx: {} Vx: {}", direction, v);
-        }
+
     }
 }
