@@ -26,7 +26,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             if x > 900 {
                 break;
             }
-        thread::sleep(Duration::from_millis(10));
+        thread::sleep(Duration::from_millis(100));
         uart.set_read_mode(0, Duration::default())?;
         uart.set_write_mode(false)?;
 /*
@@ -76,7 +76,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         
         let mut buffer_w = [251,vc as u8,252,va as u8,253,vb as u8,0xA,0xD];
         i2c.block_write(0x01, &mut buffer_w).unwrap_or_default();
-        
+
         let mut buffer_r = [0u8;3];
         i2c_imu.block_read(0x1E,&mut buffer_r).unwrap_or_default();
         println!("block read with length {} using command 0x1E -> {:?} ", buffer_r.len(), buffer_r);
