@@ -77,7 +77,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         let mut buffer_w = [251,vc as u8,252,va as u8,253,vb as u8,0xA,0xD];
         i2c_imu.block_write(0x01, &mut buffer_w).unwrap_or_default();
 
-        let mut buffer_r = [0u8;3];
+        let mut buffer_r = [0u8;7];
         i2c_imu.block_read(0x1E,&mut buffer_r).unwrap_or_default();
         println!("block read with length {} using command 0x1E -> {:?} ", buffer_r.len(), buffer_r);
         //println!("Lx: {} Vx: {}", direction, v);
@@ -87,7 +87,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             if x > 9 {
                 break;
             }
-            thread::sleep(Duration::from_millis(10000));
+            thread::sleep(Duration::from_millis(2000));
             println!("State 4");
         let mut direction = 0.0;
         let mut angle1 = PI/3.0+direction*PI/1800.0;
@@ -103,7 +103,11 @@ fn main() -> Result<(), Box<dyn Error>> {
         
         let mut buffer_w = [251,vc as u8,252,va as u8,253,vb as u8,0xA,0xD];  // needs a flush
         i2c_imu.block_write(0x01, &mut buffer_w).unwrap_or_default();
-        println!("Lx: {} Vx: {}", direction, v);
+
+        let mut buffer_r = [0u8;7];
+        i2c_imu.block_read(0x1E,&mut buffer_r).unwrap_or_default();
+        println!("block read with length {} using command 0x1E -> {:?} ", buffer_r.len(), buffer_r);
+        //println!("Lx: {} Vx: {}", direction, v);
         }
     }
 }
