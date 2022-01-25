@@ -219,9 +219,9 @@ Text GLabel 10100 3500 2    50   Input ~ 0
 SDA_IMU
 Text GLabel 10100 3400 2    50   Input ~ 0
 SCL_IMU
-Text GLabel 9700 4500 2    50   Input ~ 0
+Text GLabel 7400 3250 2    50   Input ~ 0
 SCL_IMU
-Text GLabel 9700 4400 2    50   Input ~ 0
+Text GLabel 7400 3150 2    50   Input ~ 0
 SDA_IMU
 Text GLabel 5300 2100 2    50   Input ~ 0
 SCL3V3
@@ -253,9 +253,9 @@ Text GLabel 5900 4900 0    50   Input ~ 0
 SCL3V3
 Text GLabel 5900 5000 0    50   Input ~ 0
 SDA3V3
-Text GLabel 6700 5000 2    50   Input ~ 0
-SCL5V
 Text GLabel 6700 4900 2    50   Input ~ 0
+SCL5V
+Text GLabel 6700 5000 2    50   Input ~ 0
 SDA5V
 $Comp
 L Connector:Conn_01x06_Male J1
@@ -316,18 +316,6 @@ F 3 "" H 2650 3750 50  0001 C CNN
 	1    2650 3750
 	0    1    1    0   
 $EndComp
-Text GLabel 9450 4500 0    50   Input ~ 0
-SCL3V3
-Text GLabel 9450 4400 0    50   Input ~ 0
-SDA3V3
-Wire Wire Line
-	9450 4400 9700 4400
-Wire Wire Line
-	9700 4500 9450 4500
-Text GLabel 7400 3250 2    50   Input ~ 0
-SCL5V
-Text GLabel 7400 3150 2    50   Input ~ 0
-SDA5V
 Wire Wire Line
 	7400 3150 7250 3150
 Wire Wire Line
@@ -387,7 +375,7 @@ F 3 "" H 2650 4850 50  0001 C CNN
 	1    2650 4850
 	0    1    1    0   
 $EndComp
-Text GLabel 2650 4450 2    50   Input ~ 0
+Text GLabel 6250 2150 0    50   Input ~ 0
 RX5V
 Text GLabel 2650 4550 2    50   Input ~ 0
 TX5V
@@ -492,4 +480,8 @@ F 3 "" H 3150 1300 50  0001 C CNN
 $EndComp
 Wire Wire Line
 	3350 1300 3150 1300
+Text GLabel 6250 2250 0    50   Input ~ 0
+TX-RX_link
+Text GLabel 2650 4450 2    50   Input ~ 0
+TX-RX_link
 $EndSCHEMATC

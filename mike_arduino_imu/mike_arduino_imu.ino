@@ -22,7 +22,7 @@ Adafruit_Mahony filter;  // fastest/smalleset
   Adafruit_Sensor_Calibration_SDFat cal;
 #endif
 
-#define FILTER_UPDATE_RATE_HZ 10
+#define FILTER_UPDATE_RATE_HZ 100
 #define PRINT_EVERY_N_UPDATES 1
 //#define AHRS_DEBUG_OUTPUT
 
@@ -179,7 +179,7 @@ float leaning,direct;
   //Serial.print(",qz:");
   //Serial.println(qz, 4);  
   
-int h,l,d;
+uint16_t h,l,d;
 h = 10.0*heading+0.5; 
 l = 10.0*leaning+0.5;
 d = 10.0*direct+0.5;
@@ -192,11 +192,11 @@ Serial.print(",");
 Serial.print(d);
 Serial.println(",end");
 Wire.beginTransmission(0xff);
-Wire.write(h>>8&0xff);
+Wire.write((h>>8)&0xff);
 Wire.write(h&0xff);
-Wire.write(l>>8&0xff);
+Wire.write((l>>8)&0xff);
 Wire.write(l&0xff);
-Wire.write(d>>8&0xff);
+Wire.write((d>>8)&0xff);
 Wire.write(d&0xff);
 Wire.endTransmission();
   
