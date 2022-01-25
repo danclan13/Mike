@@ -75,7 +75,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         println!("{} {} {}", vc,va,vb);
         
         let mut buffer_w = [251,vc as u8,252,va as u8,253,vb as u8,0xA,0xD];
-        i2c.block_write(0x01, &mut buffer_w).unwrap_or_default();
+        i2c_imu.block_write(0x01, &mut buffer_w).unwrap_or_default();
 
         let mut buffer_r = [0u8;3];
         i2c_imu.block_read(0x1E,&mut buffer_r).unwrap_or_default();
