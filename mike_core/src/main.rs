@@ -22,11 +22,11 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     loop {
         println!("State 2");
-        for x in 1..1000 {
-            if x > 900 {
+        for x in 1..100 {
+            if x > 90 {
                 break;
             }
-        thread::sleep(Duration::from_millis(100));
+        thread::sleep(Duration::from_millis(1000));
         uart.set_read_mode(0, Duration::default())?;
         uart.set_write_mode(false)?;
 /*
@@ -82,7 +82,12 @@ fn main() -> Result<(), Box<dyn Error>> {
         println!("block read with length {} using command 0x1E -> {:?} ", buffer_r.len(), buffer_r);
         //println!("Lx: {} Vx: {}", direction, v);
         }
-        
+
+        for x in 1..10 {
+            if x > 9 {
+                break;
+            }
+            thread::sleep(Duration::from_millis(10000));
             println!("State 4");
         let mut direction = 0.0;
         let mut angle1 = PI/3.0+direction*PI/1800.0;
@@ -99,6 +104,6 @@ fn main() -> Result<(), Box<dyn Error>> {
         let mut buffer_w = [251,vc as u8,252,va as u8,253,vb as u8,0xA,0xD];  // needs a flush
         i2c_imu.block_write(0x01, &mut buffer_w).unwrap_or_default();
         println!("Lx: {} Vx: {}", direction, v);
-        
+        }
     }
 }
