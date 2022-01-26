@@ -97,7 +97,7 @@ int8_t i;
 void setup()
 {
   Serial.begin(115200);
-  Serial.print("Starting...\n");
+//  Serial.print("Starting...\n");
 
   // we need to initialize the pixy object
   pixy.init();
@@ -114,7 +114,7 @@ void loop()
  
   if (Serial.available()) {
     ringbuff[writepos] = Serial.read();
-    if (ringbuff[writepos] == 0x0A)
+    if (ringbuff[writepos] == '\n')
       lineavailable = true;
     writepos++;
   }
@@ -134,9 +134,9 @@ void loop()
       
       for (i = 0; i < pixy.line.numBarcodes; i++)
       {
-        sprintf(buf, "barcode %d: ", i);
-        Serial.print(buf);
-        pixy.line.barcodes[i].print();
+//        sprintf(buf, "barcode %d: ", i);
+//        Serial.print(buf);
+//        pixy.line.barcodes[i].print();
         if(pixy.line.barcodes[i].m_code==0){
           mode = 1;
           pixy.setServos(Pan_Default, Tilt_Linemode);
@@ -439,8 +439,8 @@ void setCameraMode(int px_mode) {
 void setMode(int sm) {
   Send_setmode(sm);
   mode = sm;
-  sprintf(buf, "Set to mode %d\n", mode);
-  Serial.print(buf);
+//  sprintf(buf, "Set to mode %dp\r\n", mode);
+//  Serial.print(buf);
 }
 
 void serial_parse() {
@@ -450,113 +450,115 @@ void serial_parse() {
     j++;
     readpos++;
   }
-
-  char num[3];
-  int16_t val;
-  uint16_t readval;
-  if (strstr(read, "setmode") != NULL | strstr(read, "Setmode") != NULL | strstr(read, "SetMode") != NULL | strstr(read, "setMode") != NULL) {
-    i = 0;
-    while (read[i] != ' ') i++;
-    i++;
-    for (j = 0; j < 3; j++) {
-      if (read[i] >= '0' && read[i] <= '9')
-        num[j] = read[i];
-      else
-        num[j] = 0;
+  if(strstr(read,"c\r\n")!= NULL){
+    char num[3];
+    int16_t val;
+    uint16_t readval;
+    if (strstr(read, "setmode") != NULL | strstr(read, "Setmode") != NULL | strstr(read, "SetMode") != NULL | strstr(read, "setMode") != NULL) {
+      i = 0;
+      while (read[i] != ' ') i++;
       i++;
+      for (j = 0; j < 3; j++) {
+        if (read[i] >= '0' && read[i] <= '9')
+          num[j] = read[i];
+        else
+          num[j] = 0;
+        i++;
+      }
+      setMode(atoi(num));
     }
-    setMode(atoi(num));
-  }
-  else if (strstr(read, "getmode") != NULL | strstr(read, "Getmode") != NULL | strstr(read, "GetMode") != NULL | strstr(read, "getMode") != NULL) {
-    sprintf(buf, (char *)pgm_read_word(&string_curmode), mode);
-    Serial.print(buf);
-  }
-  else if (strstr(read, "help") != NULL | strstr(read, "Help") != NULL | strstr(read, "HELP") != NULL) {
-    sprintf(buf, (char *)pgm_read_word(&(string_curmode)), mode);
-    Serial.print(buf);
-    for (int i = 0; i < 9; i++) {
-      strcpy_P(buf, (char *)pgm_read_word(&(helpmenu[i])));  // Necessary casts and dereferencing, just copy.
+    else if (strstr(read, "getmode") != NULL | strstr(read, "Getmode") != NULL | strstr(read, "GetMode") != NULL | strstr(read, "getMode") != NULL) {
+      sprintf(buf, (char *)pgm_read_word(&string_curmode), mode);
       Serial.print(buf);
-      delay(100);
     }
-  }
-
-
-  // commands to change settings in EEPROM
-  else if (strstr(read, "P_") != NULL) {
-    i = 0;
-    while (read[i] != ' ') i++;
-    i++;
-    for (j = 0; j < 3; j++) {
-      if (read[i] >= '0' && read[i] <= '9')
-        num[j] = read[i];
-      else
-        num[j] = 0;
+    else if (strstr(read, "help") != NULL | strstr(read, "Help") != NULL | strstr(read, "HELP") != NULL) {
+      sprintf(buf, (char *)pgm_read_word(&(string_curmode)), mode);
+      Serial.print(buf);
+      for (int i = 0; i < 9; i++) {
+        strcpy_P(buf, (char *)pgm_read_word(&(helpmenu[i])));  // Necessary casts and dereferencing, just copy.
+        Serial.print(buf);
+        delay(100);
+      }
+    }
+    // commands to change settings in EEPROM
+    else if (strstr(read, "P_") != NULL) {
+      i = 0;
+      while (read[i] != ' ') i++;
       i++;
+      for (j = 0; j < 3; j++) {
+        if (read[i] >= '0' && read[i] <= '9')
+          num[j] = read[i];
+        else
+          num[j] = 0;
+        i++;
+      }
+      val = atoi(num);
+      if (strstr(read, "def") != NULL) {
+        readval = eeprom_write16(ADDR_P_DEF, val);
+      }
+      else if (strstr(read, "lin") != NULL) {
+        readval = eeprom_write16(ADDR_P_LIN, val);
+      }
+      else if (strstr(read, "tra") != NULL) {
+        readval = eeprom_write16(ADDR_P_TRA, val);
+      }
+      else if (strstr(read, "rou") != NULL) {
+        readval = eeprom_write16(ADDR_P_ROU, val);
+      }
+      else if (strstr(read, "but") != NULL) {
+        readval = eeprom_write16(ADDR_P_BUT, val);
+      }
     }
-    val = atoi(num);
-    if (strstr(read, "def") != NULL) {
-      readval = eeprom_write16(ADDR_P_DEF, val);
+    else if (strstr(read, "T_") != NULL) {
+      if (strstr(read, "def") != NULL) {
+        readval = eeprom_write16(ADDR_T_DEF, val);
+      }
+      else if (strstr(read, "lin") != NULL) {
+        readval = eeprom_write16(ADDR_T_LIN, val);
+      }
+      else if (strstr(read, "tra") != NULL) {
+        readval = eeprom_write16(ADDR_T_TRA, val);
+      }
+      else if (strstr(read, "rou") != NULL) {
+        readval = eeprom_write16(ADDR_T_ROU, val);
+      }
+      else if (strstr(read, "but") != NULL) {
+        readval = eeprom_write16(ADDR_T_BUT, val);
+      }
     }
-    else if (strstr(read, "lin") != NULL) {
-      readval = eeprom_write16(ADDR_P_LIN, val);
-    }
-    else if (strstr(read, "tra") != NULL) {
-      readval = eeprom_write16(ADDR_P_TRA, val);
-    }
-    else if (strstr(read, "rou") != NULL) {
-      readval = eeprom_write16(ADDR_P_ROU, val);
-    }
-    else if (strstr(read, "but") != NULL) {
-      readval = eeprom_write16(ADDR_P_BUT, val);
-    }
-  }
-  else if (strstr(read, "T_") != NULL) {
-    if (strstr(read, "def") != NULL) {
-      readval = eeprom_write16(ADDR_T_DEF, val);
-    }
-    else if (strstr(read, "lin") != NULL) {
-      readval = eeprom_write16(ADDR_T_LIN, val);
-    }
-    else if (strstr(read, "tra") != NULL) {
-      readval = eeprom_write16(ADDR_T_TRA, val);
-    }
-    else if (strstr(read, "rou") != NULL) {
-      readval = eeprom_write16(ADDR_T_ROU, val);
-    }
-    else if (strstr(read, "but") != NULL) {
-      readval = eeprom_write16(ADDR_T_BUT, val);
-    }
-  }
-  else if (strstr(read, "spd_fst") != NULL) {
-
-    i = 0;
-    while (read[i] != ' ') i++;
-    i++;
-    for (j = 0; j < 3; j++) {
-      if (read[i] >= '0' && read[i] <= '9')
-        num[j] = read[i];
-      else
-        num[j] = 0;
+    else if (strstr(read, "spd_fst") != NULL) {
+  
+      i = 0;
+      while (read[i] != ' ') i++;
       i++;
+      for (j = 0; j < 3; j++) {
+        if (read[i] >= '0' && read[i] <= '9')
+          num[j] = read[i];
+        else
+          num[j] = 0;
+        i++;
+      }
+      val = atoi(num);
+      readval = eeprom_write16(ADDR_SPD_FST, val);
     }
-    val = atoi(num);
-    readval = eeprom_write16(ADDR_SPD_FST, val);
-  }
-  else if (strstr(read, "spd_slo") != NULL) {
-
-    i = 0;
-    while (read[i] != ' ') i++;
-    i++;
-    for (j = 0; j < 3; j++) {
-      if (read[i] >= '0' && read[i] <= '9')
-        num[j] = read[i];
-      else
-        num[j] = 0;
+    else if (strstr(read, "spd_slo") != NULL) {
+  
+      i = 0;
+      while (read[i] != ' ') i++;
       i++;
+      for (j = 0; j < 3; j++) {
+        if (read[i] >= '0' && read[i] <= '9')
+          num[j] = read[i];
+        else
+          num[j] = 0;
+        i++;
+      }
+      val = atoi(num);
+      readval = eeprom_write16(ADDR_SPD_SLO, val);
     }
-    val = atoi(num);
-    readval = eeprom_write16(ADDR_SPD_SLO, val);
+  }
+  else{
+    Serial.print(read);
   }
 
 }
@@ -567,8 +569,8 @@ uint16_t eeprom_write16(uint16_t addr, uint16_t val) {
   EEPROM.write(addr + 1 , val & 0xff);
   delay(100);
   uint16_t readval = (EEPROM.read(addr) << 8) + EEPROM.read(addr + 1);
-  sprintf(buf,"wrote %d to EEPROM address %d\n",val,addr);
-  Serial.print(buf);
+//  sprintf(buf,"wrote %d to EEPROM address %d\n",val,addr);
+//  Serial.print(buf);
   return readval;
 }
 
@@ -579,12 +581,13 @@ void drive(uint16_t deg, int spd) {
   buf[2] = deg >> 8 & 0xff;
   buf[3] = deg & 0xff;
   buf[4] = spd;
-  buf[5] = '\n';
+  buf[5] = 'p';
   buf[6] = '\r';
-  buf[7] = '\0';
+  buf[7] = '\n';
+  buf[8] = '\0';
   Serial.print(buf);
-  sprintf(buf, "Driving to %d° at %d speed\n", deg, spd);
-  Serial.print(buf);
+//  sprintf(buf, "Driving to %d° at %d speed\n", deg, spd);
+//  Serial.print(buf);
 }
 
 void rotate(uint16_t deg, int spd) {
@@ -593,12 +596,13 @@ void rotate(uint16_t deg, int spd) {
   buf[2] = deg >> 8 & 0xff;
   buf[3] = deg & 0xff;
   buf[4] = spd;
-  buf[5] = '\n';
-  buf[6] = '\r';
+  buf[4] = 'p';
+  buf[5] = '\r';
+  buf[6] = '\n';
   buf[7] = '\0';
   Serial.print(buf);
-  sprintf(buf, "Driving to %d° at %d speed\n", deg, spd);
-  Serial.print(buf);
+//  sprintf(buf, "Driving to %d° at %d speed\n", deg, spd);
+//  Serial.print(buf);
 }
 
 // 0: horizontal
@@ -618,8 +622,8 @@ void follow_line(uint8_t dir) {
       dy = pixy.line.vectors[i].m_y0 - pixy.line.vectors[i].m_y1; // get difference between y coordinates
       double vLength = sqrt(pow(dx, 2) + pow(dy, 2));
       dirLocal[i] = (int8_t)(180 / 3.141592) * acos(-dx / vLength) - 90;
-      sprintf(buf, "angle %d: %d %d %d\n", i, (int)dirLocal[i], dx, dy);
-      Serial.print(buf);
+//      sprintf(buf, "angle %d: %d %d %d\n", i, (int)dirLocal[i], dx, dy);
+//      Serial.print(buf);
       if (dir == 0) {
         DeltaDirLocal[i] = 90 - abs(dirLocal[i]);
         if (lowestval > (int) DeltaDirLocal[i]) {
@@ -633,8 +637,9 @@ void follow_line(uint8_t dir) {
         }
       }
     }
-    sprintf(buf, "The best value is %d\n", (int) dirLocal[bestfit]);
-    Serial.print(buf);
+//    sprintf(buf, "The best value is %d\n", (int) dirLocal[bestfit]);
+//    Serial.print(buf);
+    drive(dirLocal[bestfit],10);
   }
 }
 
@@ -642,13 +647,14 @@ void Send_setmode(uint8_t modevar) {
   buf[0] = 'S';
   buf[1] = 'M';
   buf[2] = modevar;
-  buf[3] = '\n';
+  buf[3] = "p";
   buf[4] = '\r';
-  buf[5] = '\0';
+  buf[5] = '\n';
+  buf[6] = '\0';
   Serial.print(buf);
 }
 void Send_getmode() {
-  Serial.write("GM\n\r");
+  Serial.write("GMp\n\r");
 }
 // debugging code
 void debug_line() {

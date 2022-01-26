@@ -26,6 +26,18 @@ Adafruit_Mahony filter;  // fastest/smalleset
 #define PRINT_EVERY_N_UPDATES 1
 //#define AHRS_DEBUG_OUTPUT
 
+
+
+// serial varibles
+char buf[256];
+char ringbuff[256];
+uint8_t readpos = 0;
+uint8_t writepos = 0;
+char read[256];
+bool lineavailable = false;
+uint8_t sendLines = 0;
+
+
 uint32_t timestamp;
 
 void setup() {
@@ -47,8 +59,9 @@ void setup() {
       }
         
     }
-  }
   
+  }
+  Serial.println("Sensors OK");
   //accelerometer->printSensorDetails();
   //gyroscope->printSensorDetails();
   //magnetometer->printSensorDetails();
@@ -56,27 +69,45 @@ void setup() {
   setup_sensors();
   filter.begin(FILTER_UPDATE_RATE_HZ);
   timestamp = millis();
+
   Wire.setClock(400000); // 400KHz
-  Wire.begin(0x57);
-  Wire.onReceive(receiveData);
 }
 
+void loop() {
+  
+  float roll, pitch, heading;
   float gx, gy, gz;
-  bool readdata = false;
-void readsensors(void){
+  static uint8_t counter = 0;
+  if (Serial.available()) {
+    while(Serial.available()){
+      ringbuff[writepos] = Serial.read();
+      if (ringbuff[writepos] == 0x0A)
+        lineavailable = true;
+      writepos++;
+    }
+  }
+  if (lineavailable) {
+    lineavailable = false;
+    serial_parse();
+  }
+  if ((millis() - timestamp) < (1000 / FILTER_UPDATE_RATE_HZ)) {
+    return;
+  }
+  timestamp = millis();
+
+  
+  // Read the motion sensors
   sensors_event_t accel, gyro, mag;
   accelerometer->getEvent(&accel);
   gyroscope->getEvent(&gyro);
   magnetometer->getEvent(&mag);
-
-  
-  cal.calibrate(mag);
-  cal.calibrate(accel);
-  cal.calibrate(gyro);
 #if defined(AHRS_DEBUG_OUTPUT)
   Serial.print("I2C took "); Serial.print(millis()-timestamp); Serial.println(" ms");
 #endif
 
+  cal.calibrate(mag);
+  cal.calibrate(accel);
+  cal.calibrate(gyro);
   // Gyroscope needs to be converted from Rad/s to Degree/s
   // the rest are not unit-important
   gx = gyro.gyro.x * SENSORS_RADS_TO_DPS;
@@ -91,24 +122,7 @@ void readsensors(void){
   Serial.print("Update took "); Serial.print(millis()-timestamp); Serial.println(" ms");
 #endif
 
- 
-}
-void loop() {
-  if(readdata == true){
-    readdata = false;
-  float roll, pitch, heading;
-  static uint8_t counter = 0;
-/*
-  if ((millis() - timestamp) < (1000 / FILTER_UPDATE_RATE_HZ)) {
-    return;
-  }
-  timestamp = millis();
-
-*/  
-  // Read the motion sensors
-  readsensors();
-
-   // only print the calculated output once in a while
+  // only print the calculated output once in a while
   if (counter++ <= PRINT_EVERY_N_UPDATES) {
     return;
   }
@@ -179,26 +193,20 @@ float leaning,direct;
   //Serial.print(",qz:");
   //Serial.println(qz, 4);  
   
-uint16_t h,l,d;
+int h,l,d;
 h = 10.0*heading+0.5; 
 l = 10.0*leaning+0.5;
 d = 10.0*direct+0.5;
-
-Serial.print("hld,");
-Serial.print(h);
-Serial.print(",");
-Serial.print(l);
-Serial.print(",");
-Serial.print(d);
-Serial.println(",end");
-Wire.beginTransmission(0xff);
-Wire.write((h>>8)&0xff);
-Wire.write(h&0xff);
-Wire.write((l>>8)&0xff);
-Wire.write(l&0xff);
-Wire.write((d>>8)&0xff);
-Wire.write(d&0xff);
-Wire.endTransmission();
+if(sendLines>0){
+  Serial.print("hld,");
+  Serial.print(h);
+  Serial.print(",");
+  Serial.print(l);
+  Serial.print(",");
+  Serial.print(d);
+  Serial.print(",endp\r\n");
+  sendLines--;
+}
   
   //float attitude, bank;
   //heading = 57.3*atan2(2.0 * (qx*qy + qz*qw),(sq(qx) - sq(qy) - sq(qz) + sq(qw)));
@@ -216,16 +224,26 @@ Wire.endTransmission();
 #if defined(AHRS_DEBUG_OUTPUT)
   Serial.print("Took "); Serial.print(millis()-timestamp); Serial.println(" ms");
 #endif
-  }
 }
 
-void receiveData (int howMany){
-  for (int i = 0; i < howMany; i++)
-    {
-    byte c = Wire.read ();
-      if(c==0x1e)
-      {
-        readdata = true;
-      }
-    }  // end of for loop
+
+void serial_parse() {
+  uint8_t j = 0;
+  while (readpos != writepos) {
+    read[j] = ringbuff[readpos];
+    j++;
+    readpos++;
+  }
+  if(strstr(read,"i\r\n")!= NULL){
+    char num[3];
+    int16_t val;
+    uint16_t readval;
+    if (strstr(read, "read") != NULL){
+      sendLines = read[4];
+    }
+  }
+  else{
+    Serial.print(read);
+  }
+
 }
