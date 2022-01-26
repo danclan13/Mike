@@ -1,4 +1,4 @@
-19291029839200830
+19289390007552958
 Battery
 BatteryHolder_Bulgin_BX0036_1xC
 Bulgin Battery Holder, BX0036, Battery Type C (https://www.bulgin.com/products/pub/media/bulgin/data/Battery_holders.pdf)
@@ -83033,42 +83033,35 @@ LP2980IM5X-5.0&slash_NOPB
 0
 5
 5
-mike_pcb_motors
+mike_pcb_control
 Adafruit_Feather_Pinout
 Through hole straight pin header, 1x16, 2.54mm pitch, single row
 Through hole pin header THT 1x16 2.54mm single row
 0
 32
 32
-mike_pcb_motors
+mike_pcb_control
 DF_buck-converter_8-28to5
 Through hole straight pin header, 1x08, 2.54mm pitch, single row
 Through hole pin header THT 1x08 2.54mm single row
 0
 8
 8
-mike_pcb_motors
+mike_pcb_control
 LLC-4channel
 Through hole straight pin header, 1x06, 2.54mm pitch, single row
 Through hole pin header THT 1x06 2.54mm single row
 0
 12
 12
-mike_pcb_motors
+mike_pcb_control
 RasPi0,2,3-Header-upside_down
 Through hole straight pin header, 2x20, 2.54mm pitch, double rows
 Through hole pin header THT 2x20 2.54mm double row
 0
 40
 40
-mike_pcb_motors
-SBX-DRIVER
-Through hole straight pin header, 1x11, 2.54mm pitch, single row
-Through hole pin header THT 1x11 2.54mm single row
-0
-12
-10
-mike_pcb_motors
+mike_pcb_control
 mdd3a
 Through hole straight pin header, 1x11, 2.54mm pitch, single row
 Through hole pin header THT 1x11 2.54mm single row
