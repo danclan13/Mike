@@ -98,13 +98,13 @@ void setup()
 {
   Serial.begin(115200);
 //  Serial.print("Starting...\n");
-
+/*
   // we need to initialize the pixy object
   pixy.init();
   // Change to line tracking program
   pixy.changeProg("line");
   pixy.line.setDefaultTurn(0);
-  pixy.setCameraBrightness(85); // set brightness to default
+  pixy.setCameraBrightness(85); // set brightness to default*/
 }
 
 void loop()
@@ -122,6 +122,8 @@ void loop()
     lineavailable = false;
     serial_parse();
   }
+
+  /*
   pixy.line.getAllFeatures();
   if(pixy.line.barcodes[0].m_code == 14){
     mode = 0;
@@ -308,6 +310,7 @@ void loop()
     default:
       break;
   }
+  */
 }
 
 /*
