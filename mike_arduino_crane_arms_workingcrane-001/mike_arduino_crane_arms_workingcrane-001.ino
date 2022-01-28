@@ -62,9 +62,8 @@ const int mc_sw = 7;
 
 ///////////////////////////////////////////////////////////////////////  Crane variables
 volatile boolean liftdone = 1;
-volatile boolean liftreport = 0;
 unsigned stepdone = 0;
-unsigned long cranetimer = 0;
+unsigned long cranetimer = 0; 
 unsigned long cranetimeout = 500; // in milliseconds
 unsigned long craneout = 166;  //going to the hole forward in mm
 unsigned long hookdown = 570;  // going to the hole down in mm?
@@ -92,7 +91,6 @@ void setup()
   Wire.begin(81);                // join i2c bus with address #81
   delay(100);
   Wire.onReceive(receiveEvent);
-  Wire.onRequest(requestEvent);
 
   if (PID1.err()) {
     Serial.println("There is a configuration error!");
@@ -210,9 +208,9 @@ void loop()
   ****************************************************************/
   if (refFlag == true)
   {
-    dpos1 = crane[0];
-    lSpos = crane[1];
-    rSpos = 180 - crane[2];
+    //dpos1 = crane[0];
+    //lSpos = 20;
+    //rSpos = 20;
 
     bridgeLifting();    // execute the bridge lifting
 
@@ -378,13 +376,6 @@ void receiveEvent(int howMany) {
   }
 }
 
-
-void requestEvent() {
-  Wire.write("p,");
-  Wire.write(liftreport);
-  Wire.write(",\r\n");
-}
-
 void interruptFunction1() {
   t1 = t1_updated;
   t1_updated = micros();
@@ -421,73 +412,62 @@ void craneReferencing() {
 
 
 void bridgeLifting() {
-  if (liftdone != 1) {          // check if lifting required
-    if (stepdone == 0) {
+  if (liftdone != 1){           // check if lifting required
+    if (stepdone == 0){
       dpos2 = craneout;         // on step 1 extend the crane
       dspeed2 = 50;
-      if (cpos2 == dpos2) {
-        stepdone = 1;
-      }          // when step 1 is done set stepdone to '1'
+      if (cpos2 == dpos2){ 
+        stepdone = 1;}          // when step 1 is done set stepdone to '1'
     }
-    else if (stepdone == 1) {
+    if (stepdone == 1){
       dpos1 = hookdown;         // on step 2 lower the hook
       dspeed1 = 45;
-      if (cpos1 == dpos1) {
+      if (cpos1 == dpos1){ 
         cranetimer = micros();  // when step 2 is done, start the pause timer and set stepdone to '2'
-        stepdone = 2;
-      }
+        stepdone = 2;} 
     }
-    else if (stepdone == 2) {
-      if ((cranetimer + 1000 * cranetimeout) < micros()) {  // on step 3 wait for the timer
-        stepdone = 3;
-      }                                      // when step 3 is done, set stepdone to '3'
+    if (stepdone == 2){
+      if ((cranetimer + 1000*cranetimeout) < micros()){     // on step 3 wait for the timer
+        stepdone = 3;}                                      // when step 3 is done, set stepdone to '3'
     }
-    else if (stepdone == 3) {
+    if (stepdone == 3){
       dpos1 = hookdown - hookbitup;         // on step 4 hook up the bridge a bit
       dspeed1 = 16;
-      if (cpos1 == dpos1) {
-        stepdone = 4;
-      }                      // when step 4 is done, set stepdone to '4'
+      if (cpos1 == dpos1){ 
+        stepdone = 4;}                      // when step 4 is done, set stepdone to '4'
     }
-    else if (stepdone == 4) {
+    if (stepdone == 4){
       dpos2 = cranetohole;         // on step 5 lift the bridge to a certain point and retract the jib
       dpos1 = hooktohole;
       dspeed2 = 18;
-      dspeed1 = 38;
-      if ((cpos2 == dpos2) && (cpos1 == dpos1)) {
-        stepdone = 5;
-      }            // when step 5 is done, set stepdone to '5'
+      dspeed1 = 38; 
+      if ((cpos2 == dpos2) && (cpos1 == dpos1)){ 
+        stepdone = 5;}            // when step 5 is done, set stepdone to '5'      
     }
-    else if (stepdone == 5) {
+    if (stepdone == 5){
       dpos1 = hookfinish;         // on step 6 lift the bridge to the end
       dspeed1 = 16;
-      if (cpos1 == dpos1) {
-        stepdone = 6;
-      }            // when step 6 is done, set stepdone to '6'
+      if (cpos1 == dpos1){ 
+        stepdone = 6;}            // when step 6 is done, set stepdone to '6'
     }
-    else if (stepdone == 6) {
+    if (stepdone == 6){
       dpos1 = hooktohole;         // on step 7 release the hook
-      if (cpos1 == dpos1) {
-        stepdone = 7;
-      }            // when step 7 is done, set stepdone to '7'
+      if (cpos1 == dpos1){ 
+        stepdone = 7;}            // when step 7 is done, set stepdone to '7'
     }
-    else if (stepdone == 7) {
+    if (stepdone == 7){
       dpos1 = 10;                    // on step 8 turn back the hook and the jib
-      dspeed1 = 35;
-      dpos2 = 0;
+      dspeed1 = 35; 
+      dpos2 = 0; 
       dspeed2 = 50;
-      if ((cpos2 == dpos2) && (cpos1 == dpos1)) {
-        stepdone = 8;
-      }
+      if ((cpos2 == dpos2) && (cpos1 == dpos1)){ 
+        stepdone = 8;}
     }
-    else if (stepdone == 8) {
-      liftreport = 1;
+    if (stepdone == 8){
+      liftdone = 1;
+      stepdone = 0;
     }
-  }
-  else if ((liftdone == 1) && (stepdone == 8)) {
-    stepdone = 0;
-    liftreport = 0;
-  }
+}
 }
 
 

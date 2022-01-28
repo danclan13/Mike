@@ -38,7 +38,7 @@ int lSpos, rSpos;
 
 //Specify the links and initial tuning parameters
 //float Kp = 10.8, Ki = 2.6, Kd = 0.56, Hz = 100;
-float Kp = 5.0, Ki = 0.8, Kd = 0.2, Hz = 100;
+float Kp = 7.0, Ki = 1.2, Kd = 0.4, Hz = 100;
 FastPID PID1(Kp, Ki, Kd, Hz, 9, true);          // PID regulator for the hoist motor
 FastPID PID2(Kp, Ki, Kd, Hz, 9, true);          // Extension gear motor PID
 
@@ -59,6 +59,19 @@ unsigned rpm1, rpm2;
 
 //Micro switch
 const int mc_sw = 7;
+
+///////////////////////////////////////////////////////////////////////  Crane variables
+volatile boolean liftdone = false;
+unsigned stepdone = 0;
+unsigned long cranetimer = 0; 
+unsigned long cranetimeout = 500; // in milliseconds
+unsigned long craneout = 166;  //going to the hole forward in mm
+unsigned long hookdown = 570;  // going to the hole down in mm?
+unsigned long hookbitup = 60;  // hooking up the hole in mm?
+unsigned long cranetohole = 75; // retracting the jib while lifting to this position in mm
+unsigned long hooktohole = 125; // lifting the hook while retracting to this position in mm?
+unsigned long hookfinish = 86; // finishing lifting the bridge to this position in mm?
+
 
 //Driver
 const int pwm_11 = 11; // flipped for the hoist motor
@@ -189,18 +202,8 @@ void loop()
       begin referencing the crane jib if not yet referenced
   ****************************************************************/
 
-  if (refFlag == false) {
-    if (swFlag == false && digitalRead(mc_sw) == HIGH) {
-      Setpoint2 = -20;
-    }
-    if (swFlag == true || digitalRead(mc_sw) == LOW) {
-      Setpoint2 = 0;
-      cpos2 = 0;
-      refFlag = true;
-      swFlag = false;
-      //Serial.println("Crane retraction is now calibrated");
-    }
-  }
+
+  craneReferencing();
 
   /****************************************************************
      end referencing the crane jib if not yet referenced
@@ -217,7 +220,9 @@ void loop()
     dspeed2 = motor[3];
     lSpos = motor[4];
     rSpos = motor[5];
-    
+
+    //bridgeLifting();
+
 
     if (cpos1 < dpos1) {
       Setpoint1 = dspeed1;
@@ -395,6 +400,12 @@ void receiveEvent(int howMany) {
   }
 }
 
+
+void requestEvent() {
+  Wire.write("hello "); // respond with message of 6 bytes
+  // as expected by master
+}
+
 void interruptFunction1() {
   t1 = t1_updated;
   t1_updated = micros();
@@ -412,6 +423,84 @@ void interruptFunction2() {
 void interruptFunction3() {
   swFlag = true;
 }
+
+
+void craneReferencing() {
+  if (refFlag == false) {
+    if (swFlag == false && digitalRead(mc_sw) == HIGH) {
+      Setpoint2 = -20;
+    }
+    if (swFlag == true || digitalRead(mc_sw) == LOW) {
+      Setpoint2 = 0;
+      cpos2 = 0;
+      refFlag = true;
+      swFlag = false;
+      //Serial.println("Crane retraction is now calibrated");
+    }
+  }
+}
+
+
+void bridgeLifting() {
+  if (liftdone != 1){           // check if lifting required
+    if (stepdone == 0){
+      dpos2 = craneout;         // on step 1 extend the crane
+      dspeed2 = 50;
+      if (cpos2 == dpos2){ 
+        stepdone = 1;}          // when step 1 is done set stepdone to '1'
+    }
+    if (stepdone == 1){
+      dpos1 = hookdown;         // on step 2 lower the hook
+      dspeed1 = 45;
+      if (cpos1 == dpos1){ 
+        cranetimer = micros();  // when step 2 is done, start the pause timer and set stepdone to '2'
+        stepdone = 2;} 
+    }
+    if (stepdone == 2){
+      if ((cranetimer + 1000*cranetimeout) < micros()){     // on step 3 wait for the timer
+        stepdone = 3;}                                      // when step 3 is done, set stepdone to '3'
+    }
+    if (stepdone == 3){
+      dpos1 = hookdown - hookbitup;         // on step 4 hook up the bridge a bit
+      dspeed1 = 16;
+      if (cpos1 == dpos1){ 
+        stepdone = 4;}                      // when step 4 is done, set stepdone to '4'
+    }
+    if (stepdone == 4){
+      dpos2 = cranetohole;         // on step 5 lift the bridge to a certain point and retract the jib
+      dpos1 = hooktohole;
+      dspeed2 = 18;
+      dspeed1 = 38; 
+      if ((cpos2 == dpos2) && (cpos1 == dpos1)){ 
+        stepdone = 5;}            // when step 5 is done, set stepdone to '5'      
+    }
+    if (stepdone == 5){
+      dpos1 = hookfinish;         // on step 6 lift the bridge to the end
+      dspeed1 = 16;
+      if (cpos1 == dpos1){ 
+        stepdone = 6;}            // when step 6 is done, set stepdone to '6'
+    }
+    if (stepdone == 6){
+      dpos1 = hooktohole;         // on step 7 release the hook
+      if (cpos1 == dpos1){ 
+        stepdone = 7;}            // when step 7 is done, set stepdone to '7'
+    }
+    if (stepdone == 7){
+      dpos1 = 10;                    // on step 8 turn back the hook and the jib
+      dspeed1 = 35; 
+      dpos2 = 0; 
+      dspeed2 = 50;
+      if ((cpos2 == dpos2) && (cpos1 == dpos1)){ 
+        stepdone = 8;}
+    }
+    if (stepdone == 8){
+      liftdone = 1;
+      stepdone = 0;
+    }
+}
+}
+
+
 
 /****************************************************************
      end interrupts
