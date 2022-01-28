@@ -42,35 +42,18 @@ uint32_t timestamp;
 
 void setup() {
   Serial.begin(115200);
-  while (!Serial) yield();
-
-  if (!cal.begin()) {
-    Serial.println("Failed to initialize calibration helper");
-  } else if (! cal.loadCalibration()) {
-    Serial.println("No calibration loaded/found");
-  }
-
-  if (!init_sensors()) {
-    Serial.println("Failed to find sensors");
-    while (1){
-      delay(100);
-      if(init_sensors()){
-        break;
-      }
-        
-    }
   
-  }
+ 
   Serial.println("Sensors OK");
   //accelerometer->printSensorDetails();
   //gyroscope->printSensorDetails();
   //magnetometer->printSensorDetails();
 
-  setup_sensors();
-  filter.begin(FILTER_UPDATE_RATE_HZ);
-  timestamp = millis();
+//  setup_sensors();
+//  filter.begin(FILTER_UPDATE_RATE_HZ);
+//  timestamp = millis();
 
-  Wire.setClock(400000); // 400KHz
+//  Wire.setClock(400000); // 400KHz
 }
 
 void loop() {
@@ -90,6 +73,7 @@ void loop() {
     lineavailable = false;
     serial_parse();
   }
+  /*
   if ((millis() - timestamp) < (1000 / FILTER_UPDATE_RATE_HZ)) {
     return;
   }
@@ -224,6 +208,8 @@ if(sendLines>0){
 #if defined(AHRS_DEBUG_OUTPUT)
   Serial.print("Took "); Serial.print(millis()-timestamp); Serial.println(" ms");
 #endif
+
+*/
 }
 
 

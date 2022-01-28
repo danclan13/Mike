@@ -1,0 +1,15 @@
+Messeges from Raspberry pi
+
+To IMU
+"read{HEX}i\r\n" , HEX = 0x00-0xff how many times to get data from IMU
+
+To Camera
+"setmode ###c\r\n" ### = numbers in ascii fromat from 0 - 999 - set camera mode to mode ###
+"getmode c\r\n"	get camera mode
+
+Messages to raspberry pi
+From IMU
+
+From Camera
+"DR{deg_h}{deg_l}{speed}p\r\n"  drive direction int16t "deg_h"<<8 + "deg_l" with speed "speed"
+"RO{deg_h}{deg_l}{speed}p\r\n"  rotate direction int16t "deg_h"<<8 + "deg_l" with speed "speed"
