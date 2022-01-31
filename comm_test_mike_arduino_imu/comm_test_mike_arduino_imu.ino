@@ -220,6 +220,7 @@ void serial_parse() {
     j++;
     readpos++;
   }
+  read[j] = '\0';
   if(strstr(read,"i\r\n")!= NULL){
     char num[3];
     int16_t val;

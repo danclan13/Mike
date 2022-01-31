@@ -91,12 +91,14 @@ const char string_GREEN[] PROGMEM = "GREEN\n";
 
 const char string_setmode[] PROGMEM = "setmode"; 
 
-
+#define FILTER_UPDATE_RATE_HZ 20
+uint32_t timestamp;
 int8_t i;
 //    
 void setup()
 {
   Serial.begin(115200);
+  timestamp = millis();
 //  Serial.print("Starting...\n");
 /*
   // we need to initialize the pixy object
@@ -110,8 +112,6 @@ void setup()
 void loop()
 {
 
-  delay(10); // used to reduce amount of data sent
- 
   if (Serial.available()) {
     ringbuff[writepos] = Serial.read();
     if (ringbuff[writepos] == '\n')
@@ -123,11 +123,17 @@ void loop()
     serial_parse();
   }
 
-  /*
+  if ((millis() - timestamp) < (1000 / FILTER_UPDATE_RATE_HZ)) {
+    return;
+  }
+  timestamp = millis();
+
+  Serial.print("Hello");
+ /*
   pixy.line.getAllFeatures();
   if(pixy.line.barcodes[0].m_code == 14){
     mode = 0;
-  }
+  }*/ 
   switch (mode) {
     case 0:        // Stop, wait for button input, reset all parameters
       // do nothing
@@ -310,7 +316,6 @@ void loop()
     default:
       break;
   }
-  */
 }
 
 /*
@@ -453,6 +458,7 @@ void serial_parse() {
     j++;
     readpos++;
   }
+  read[j] = '\0';
   if(strstr(read,"c\r\n")!= NULL){
     char num[3];
     int16_t val;
@@ -650,7 +656,7 @@ void Send_setmode(uint8_t modevar) {
   buf[0] = 'S';
   buf[1] = 'M';
   buf[2] = modevar;
-  buf[3] = "p";
+  buf[3] = 'p';
   buf[4] = '\r';
   buf[5] = '\n';
   buf[6] = '\0';

@@ -22,7 +22,7 @@ Adafruit_Mahony filter;  // fastest/smalleset
   Adafruit_Sensor_Calibration_SDFat cal;
 #endif
 
-#define FILTER_UPDATE_RATE_HZ 100
+#define FILTER_UPDATE_RATE_HZ 20
 #define PRINT_EVERY_N_UPDATES 1
 //#define AHRS_DEBUG_OUTPUT
 
@@ -72,7 +72,8 @@ void setup() {
 
   Wire.setClock(400000); // 400KHz
 }
-
+int distance = 0;
+int threshold_distance = 600;
 void loop() {
   
   float roll, pitch, heading;
@@ -90,11 +91,20 @@ void loop() {
     lineavailable = false;
     serial_parse();
   }
+  distance = analogRead(A0);
   if ((millis() - timestamp) < (1000 / FILTER_UPDATE_RATE_HZ)) {
     return;
   }
   timestamp = millis();
-
+  //for debugging only start
+  if(distance<threshold_distance){
+  Serial.print("DS");
+  Serial.write(distance>>2);
+  Serial.print("p\r\n");
+  
+  //Serial.print(distance); 
+  }
+  // for debugging only end
   
   // Read the motion sensors
   sensors_event_t accel, gyro, mag;
@@ -198,13 +208,8 @@ h = 10.0*heading+0.5;
 l = 10.0*leaning+0.5;
 d = 10.0*direct+0.5;
 if(sendLines>0){
-  Serial.print("hld,");
-  Serial.print(h);
-  Serial.print(",");
-  Serial.print(l);
-  Serial.print(",");
-  Serial.print(d);
-  Serial.print(",endp\r\n");
+  char buff[11] = {'I','M',h>>8,h&0xff,l>>8,l&0xff,d>>8,d&0xff,'p','\r','\n'};
+  Serial.write(buff);
   sendLines--;
 }
   
@@ -234,12 +239,18 @@ void serial_parse() {
     j++;
     readpos++;
   }
+  read[j] = '\0';
   if(strstr(read,"i\r\n")!= NULL){
     char num[3];
     int16_t val;
     uint16_t readval;
     if (strstr(read, "read") != NULL){
       sendLines = read[4];
+    }
+    if (strstr(read, "distance") != NULL){
+      Serial.print("DS");
+      Serial.write(distance>>2);
+      Serial.print("p\r\n");
     }
   }
   else{

@@ -58,7 +58,7 @@ uint16_t Tilt_Roundabout = 125;
 uint16_t Pan_RedButton = 250;
 uint16_t Tilt_RedButton = 250;
 uint8_t speed_fast = 100;
-uint8_t speed_slow = 50;
+uint8_t speed_slow = 20;
 
 
 // needs to be adjusted on competition day
@@ -92,11 +92,14 @@ const char string_GREEN[] PROGMEM = "GREEN\n";
 const char string_setmode[] PROGMEM = "setmode"; 
 
 
+#define FILTER_UPDATE_RATE_HZ 10
+uint32_t timestamp;
 int8_t i;
 //    
 void setup()
 {
   Serial.begin(115200);
+  timestamp = millis();
 //  Serial.print("Starting...\n");
 
   // we need to initialize the pixy object
@@ -109,9 +112,6 @@ void setup()
 
 void loop()
 {
-
-  delay(10); // used to reduce amount of data sent
- 
   if (Serial.available()) {
     ringbuff[writepos] = Serial.read();
     if (ringbuff[writepos] == '\n')
@@ -122,6 +122,12 @@ void loop()
     lineavailable = false;
     serial_parse();
   }
+  
+if ((millis() - timestamp) < (1000 / FILTER_UPDATE_RATE_HZ)) {
+    return;
+  }
+  timestamp = millis();
+  
   pixy.line.getAllFeatures();
   if(pixy.line.barcodes[0].m_code == 14){
     mode = 0;
@@ -149,9 +155,14 @@ void loop()
 
     case 1:        // Drive until intersection is between 40 and 45 on y axis
       // drive forward until intersection is between y=40 and y=45
-      waitForIntersection();
-      waitForIntersection_lower_center();
-      setMode(2);
+      if(waitForIntersection()){
+        
+          pixy.setServos(Pan_Default, 460);
+        waitForIntersection_lower_center();
+        
+        setMode(2);
+      }
+      
       break;
 
 
@@ -315,18 +326,25 @@ void loop()
 */
 
 // Halts the program until intersection has been found
-void waitForIntersection() {
+bool waitForIntersection() {
   pixy.line.getAllFeatures();
-  while (pixy.line.numIntersections == 0) {
+  bool found = false;
+  /*while (pixy.line.numIntersections == 0) {
+    if (Serial.available()) break;
     pixy.line.getAllFeatures();
     if(pixy.line.barcodes[0].m_code == 14){
       mode = 0;
       break;
     }
-  }
+  }*/
+  if(pixy.line.numIntersections>0)
+    found=true;
+
+  return found;
 }
 void waitForIntersection_lower_center() {
   while (pixy.line.intersections[0].m_x < 34 || pixy.line.intersections[0].m_x > 44 || pixy.line.intersections[0].m_y < 43 || pixy.line.intersections[0].m_y > 47 ) {
+    if (Serial.available()) break;
     pixy.line.getAllFeatures(); 
     if(pixy.line.barcodes[0].m_code == 14){
       mode = 0;
@@ -359,8 +377,7 @@ void waitForIntersection_lower_center() {
 void waitForGreen() {
   setCameraMode(1); // set the camera to ccc mode and reduce brightness
   while (greenNotFound) {
-    if (Serial.available())
-      break;
+    if (Serial.available()) break;
     pixy.ccc.getBlocks();
     for (i = 0; i < pixy.ccc.numBlocks; i++)
     {
@@ -450,6 +467,7 @@ void serial_parse() {
     j++;
     readpos++;
   }
+  read[j] = '\n';
   if(strstr(read,"c\r\n")!= NULL){
     char num[3];
     int16_t val;
@@ -477,7 +495,6 @@ void serial_parse() {
       for (int i = 0; i < 9; i++) {
         strcpy_P(buf, (char *)pgm_read_word(&(helpmenu[i])));  // Necessary casts and dereferencing, just copy.
         Serial.print(buf);
-        delay(100);
       }
     }
     // commands to change settings in EEPROM
@@ -567,7 +584,6 @@ void serial_parse() {
 uint16_t eeprom_write16(uint16_t addr, uint16_t val) {
   EEPROM.write(addr , val >> 8 & 0xff);
   EEPROM.write(addr + 1 , val & 0xff);
-  delay(100);
   uint16_t readval = (EEPROM.read(addr) << 8) + EEPROM.read(addr + 1);
 //  sprintf(buf,"wrote %d to EEPROM address %d\n",val,addr);
 //  Serial.print(buf);
@@ -575,17 +591,25 @@ uint16_t eeprom_write16(uint16_t addr, uint16_t val) {
 }
 
 //
-void drive(uint16_t deg, int spd) {
+void drive(int16_t deg, int spd) {
+  deg = deg*10;
   buf[0] = 'D';
   buf[1] = 'R';
-  buf[2] = deg >> 8 & 0xff;
-  buf[3] = deg & 0xff;
-  buf[4] = spd;
-  buf[5] = 'p';
-  buf[6] = '\r';
-  buf[7] = '\n';
-  buf[8] = '\0';
-  Serial.print(buf);
+  buf[2] = (deg >> 8 & 0xff) +1;
+  buf[3] = (deg & 0xff)+1;
+  buf[4] = spd+1;
+  if(deg>=0){
+    buf[5] = '+';
+  }
+  else{
+    buf[5] = '-';
+  }
+  buf[6] = 'p';
+  buf[7] = '\r';
+  buf[8] = '\n';
+  buf[9] = '\0';
+  Serial.write(buf,9);
+  delay(50);
 //  sprintf(buf, "Driving to %d° at %d speed\n", deg, spd);
 //  Serial.print(buf);
 }
@@ -596,11 +620,12 @@ void rotate(uint16_t deg, int spd) {
   buf[2] = deg >> 8 & 0xff;
   buf[3] = deg & 0xff;
   buf[4] = spd;
-  buf[4] = 'p';
-  buf[5] = '\r';
-  buf[6] = '\n';
-  buf[7] = '\0';
-  Serial.print(buf);
+  buf[5] = 'p';
+  buf[6] = '\r';
+  buf[7] = '\n';
+  buf[8] = '\0';
+  Serial.write(buf,8);
+  delay(50);
 //  sprintf(buf, "Driving to %d° at %d speed\n", deg, spd);
 //  Serial.print(buf);
 }
@@ -608,10 +633,13 @@ void rotate(uint16_t deg, int spd) {
 // 0: horizontal
 // 1: vertical
 void follow_line(uint8_t dir) {
+  
+          pixy.setServos(Pan_Default, 480);
   uint8_t bestfit = 0;
   int8_t dx;
   int8_t dy;
   int8_t dirLocal[20];
+  int8_t x1[20];
   uint8_t DeltaDirLocal[20];
   uint8_t lowestval = 45;
   pixy.line.getAllFeatures();
@@ -620,6 +648,12 @@ void follow_line(uint8_t dir) {
     if(i<=19){
       dx = pixy.line.vectors[i].m_x0 - pixy.line.vectors[i].m_x1; // get difference between x coordinates
       dy = pixy.line.vectors[i].m_y0 - pixy.line.vectors[i].m_y1; // get difference between y coordinates
+      if(dy<0){
+        x1[i] = pixy.line.vectors[i].m_x1;
+      }
+      else{
+        x1[i] = pixy.line.vectors[i].m_x0;
+      }
       double vLength = sqrt(pow(dx, 2) + pow(dy, 2));
       dirLocal[i] = (int8_t)(180 / 3.141592) * acos(-dx / vLength) - 90;
 //      sprintf(buf, "angle %d: %d %d %d\n", i, (int)dirLocal[i], dx, dy);
@@ -639,15 +673,28 @@ void follow_line(uint8_t dir) {
     }
 //    sprintf(buf, "The best value is %d\n", (int) dirLocal[bestfit]);
 //    Serial.print(buf);
-    drive(dirLocal[bestfit],10);
+
+    // drive towards center
+    if(x1[bestfit] > 42){
+      drive(-90,20);
+    }
+    else if(x1[bestfit] < 36){
+      drive(90,20);
+    }
+    else{
+      if(abs(dirLocal[bestfit])>2){
+        rotate(dirLocal[bestfit],20);
+      }
+      drive(dirLocal[bestfit],30);
+    }
   }
 }
 
 void Send_setmode(uint8_t modevar) {
   buf[0] = 'S';
   buf[1] = 'M';
-  buf[2] = modevar;
-  buf[3] = "p";
+  buf[2] = modevar+1;
+  buf[3] = 'p';
   buf[4] = '\r';
   buf[5] = '\n';
   buf[6] = '\0';

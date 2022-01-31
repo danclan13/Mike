@@ -9,6 +9,7 @@ To Camera
 
 Messages to raspberry pi
 From IMU
+"DS{dist}p\r\n"
 
 From Camera
 "DR{deg_h}{deg_l}{speed}p\r\n"  drive direction int16t "deg_h"<<8 + "deg_l" with speed "speed"
