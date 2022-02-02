@@ -91,7 +91,6 @@ const char string_GREEN[] PROGMEM = "GREEN\n";
 
 const char string_setmode[] PROGMEM = "setmode"; 
 
-
 #define FILTER_UPDATE_RATE_HZ 10
 uint32_t timestamp;
 int8_t i;
@@ -129,15 +128,21 @@ if ((millis() - timestamp) < (1000 / FILTER_UPDATE_RATE_HZ)) {
   timestamp = millis();
   
   pixy.line.getAllFeatures();
-  if(pixy.line.barcodes[0].m_code == 14){
-    mode = 0;
-  }
+ // if(pixy.line.barcodes[0].m_code == 14){
+ //   mode = 0;
+ // }
   switch (mode) {
     case 0:        // Stop, wait for button input, reset all parameters
       // do nothing
       // change camera tilt to line following setpoint
-      pixy.setServos(Pan_Default, Tilt_Default);
-      
+          if(waitForIntersection()){
+            pixy.setLED(0,150,0);
+          }
+          else{
+            pixy.setLED(0,0,0);
+          }
+          pixy.setServos(Pan_Default, 460);
+      /*
       for (i = 0; i < pixy.line.numBarcodes; i++)
       {
 //        sprintf(buf, "barcode %d: ", i);
@@ -147,30 +152,36 @@ if ((millis() - timestamp) < (1000 / FILTER_UPDATE_RATE_HZ)) {
           mode = 1;
           pixy.setServos(Pan_Default, Tilt_Linemode);
       }
-    }
+    }*/
       
       greenNotFound = true;
+      drive(0,0);
+      rotate(0,0);
       break;
 
 
     case 1:        // Drive until intersection is between 40 and 45 on y axis
-      // drive forward until intersection is between y=40 and y=45
-      if(waitForIntersection()){
-        
-          pixy.setServos(Pan_Default, 460);
-        waitForIntersection_lower_center();
-        
-        setMode(2);
-      }
+      rotate(0,0);
+      drive(0,50);
+      delay(2000);
+      drive(0,0);
+      setMode(2);
       
       break;
 
 
     case 2:        // Drive sideways to hit button
+      rotate(0,0);
+      drive(90,50);
+      delay(1200);
+      drive(-90,50);
+      delay(1200);
+      drive(0,0);
+      setMode(4);
       // keep track of stop line to ensure hiting button
       break;
 
-
+// this mode is not used while hitting green button is manual
     case 3:        // Drive sideways to find intersection again
       waitForIntersection();
       // keep track of stop line/intersection and wait for intersection to be between x= 34 and x=44
@@ -192,6 +203,7 @@ if ((millis() - timestamp) < (1000 / FILTER_UPDATE_RATE_HZ)) {
 
     case 5:        // Find intersection and turn right
       pixy.line.setDefaultTurn(-90);
+      follow_line(0);
       // follow line until intersection is available
       // take right turn on intersection
       break;
@@ -221,8 +233,8 @@ if ((millis() - timestamp) < (1000 / FILTER_UPDATE_RATE_HZ)) {
 
 
     case 10:       // Drive forward to junction turn right - If intention is to get both the bridge and the hill, jump to 17 at end
-      waitForIntersection();      // identify intersection
-      if (Go_For_bridge_and_hill) // if wanted to get hill, jump to 17 at end
+      
+      follow_line(0);
         setMode(17);
       break;
 
@@ -329,50 +341,36 @@ if ((millis() - timestamp) < (1000 / FILTER_UPDATE_RATE_HZ)) {
 bool waitForIntersection() {
   pixy.line.getAllFeatures();
   bool found = false;
-  /*while (pixy.line.numIntersections == 0) {
-    if (Serial.available()) break;
-    pixy.line.getAllFeatures();
-    if(pixy.line.barcodes[0].m_code == 14){
-      mode = 0;
-      break;
-    }
-  }*/
   if(pixy.line.numIntersections>0)
     found=true;
 
   return found;
 }
 void waitForIntersection_lower_center() {
+  while(pixy.line.numIntersections=0){
+    
+  }
   while (pixy.line.intersections[0].m_x < 34 || pixy.line.intersections[0].m_x > 44 || pixy.line.intersections[0].m_y < 43 || pixy.line.intersections[0].m_y > 47 ) {
     if (Serial.available()) break;
     pixy.line.getAllFeatures(); 
-    if(pixy.line.barcodes[0].m_code == 14){
-      mode = 0;
-      break;
-    }
-    if (pixy.line.intersections[0].m_x < 34 || pixy.line.intersections[0].m_x > 44 ) { // if x value is not in range
-      if (pixy.line.intersections[0].m_x < 34) {
-        drive(90, speed_slow);
-      }
-      else
-      {
-        drive(-90, speed_slow);
-      }
+    //if(pixy.line.barcodes[0].m_code == 14){
+    //  mode = 0;
+    //  break;
+    //}
+    follow_line(1);
+    if (pixy.line.intersections[0].m_y < 43) {
+      drive(0, speed_slow);
     }
     else
     {
-      if (pixy.line.intersections[0].m_y < 43) {
-        drive(0, speed_slow);
-      }
-      else
-      {
-        drive(180, speed_slow);
-      }
+      drive(180, speed_slow);
     }
+    
 
   }
 }
 
+// works
 // Halts the program until green is detected (signature id 3)
 void waitForGreen() {
   setCameraMode(1); // set the camera to ccc mode and reduce brightness
@@ -397,10 +395,10 @@ void waitForGreen() {
       }
       
     }
-  if(pixy.line.barcodes[0].m_code == 14){
-    mode = 0;
-      break;
-  }
+  //if(pixy.line.barcodes[0].m_code == 14){
+  //  mode = 0;
+  //    break;
+  //}
   }
   setBrightness(0); // set brightness to default
 }
@@ -411,6 +409,7 @@ void waitForGreen() {
 
 ***********************************/
 
+// works
 // sets image brightness
 void setBrightness(int br_mode) {
   if (br_mode == 0)
@@ -421,6 +420,7 @@ void setBrightness(int br_mode) {
     pixy.setCameraBrightness(85); // set brightness to default
 }
 
+// works
 /*
   Camera modes
   0: Line follow
@@ -453,6 +453,7 @@ void setCameraMode(int px_mode) {
 
 ***********************************/
 
+// works
 void setMode(int sm) {
   Send_setmode(sm);
   mode = sm;
@@ -460,6 +461,7 @@ void setMode(int sm) {
 //  Serial.print(buf);
 }
 
+// works
 void serial_parse() {
   uint8_t j = 0;
   while (readpos != writepos) {
@@ -580,6 +582,7 @@ void serial_parse() {
 
 }
 
+// not used
 // writes 16 bits to eeprom and reads them back - 100ms delay
 uint16_t eeprom_write16(uint16_t addr, uint16_t val) {
   EEPROM.write(addr , val >> 8 & 0xff);
@@ -590,7 +593,7 @@ uint16_t eeprom_write16(uint16_t addr, uint16_t val) {
   return readval;
 }
 
-//
+// works
 void drive(int16_t deg, int spd) {
   deg = deg*10;
   buf[0] = 'D';
@@ -614,6 +617,7 @@ void drive(int16_t deg, int spd) {
 //  Serial.print(buf);
 }
 
+// works
 void rotate(uint16_t deg, int spd) {
   buf[0] = 'R';
   buf[1] = 'O';
@@ -630,6 +634,7 @@ void rotate(uint16_t deg, int spd) {
 //  Serial.print(buf);
 }
 
+// works
 // 0: horizontal
 // 1: vertical
 void follow_line(uint8_t dir) {
@@ -690,6 +695,7 @@ void follow_line(uint8_t dir) {
   }
 }
 
+// works
 void Send_setmode(uint8_t modevar) {
   buf[0] = 'S';
   buf[1] = 'M';
@@ -700,9 +706,13 @@ void Send_setmode(uint8_t modevar) {
   buf[6] = '\0';
   Serial.print(buf);
 }
+
+// works
 void Send_getmode() {
   Serial.write("GMp\n\r");
 }
+
+
 // debugging code
 void debug_line() {
   // print all vectors
