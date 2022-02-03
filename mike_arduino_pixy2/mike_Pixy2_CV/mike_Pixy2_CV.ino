@@ -154,7 +154,7 @@ if ((millis() - timestamp) < (1000 / FILTER_UPDATE_RATE_HZ)) {
     case 1:        // Drive until intersection is between 40 and 45 on y axis
       rotate(0,0);
       drive(0,50);
-      delay(2360);
+      delay(1360);
       drive(0,0);
       setMode(2);
       
@@ -163,11 +163,16 @@ if ((millis() - timestamp) < (1000 / FILTER_UPDATE_RATE_HZ)) {
 
     case 2:        // Drive sideways to hit button
       rotate(0,0);
-      drive(90,50);
-      delay(1300);
-      drive(-90,50);
-      delay(1300);
-      drive(0,0);
+//      drive(90,50);
+//      delay(1300);
+//      drive(-90,50);
+//      delay(1300);
+//      drive(0,0);
+      rotate(30,0);
+      delay(2000);
+      rotate(-30,0);
+      delay(2000);
+      rotate(0,0);      
       setMode(4);
       // keep track of stop line to ensure hiting button
       break;
@@ -195,27 +200,28 @@ if ((millis() - timestamp) < (1000 / FILTER_UPDATE_RATE_HZ)) {
     case 5:        // Find intersection and turn right
       rotate(0,0);
       drive(0,50);
-      delay(2400);
+      delay(3400);
       drive(0,0);
       rotate(-30,0);
-      delay(3000);
+      delay(2000);
       rotate(0,0);
       drive(0,50);
-      delay(2400);
+      delay(5000);
       drive(0,0);
       rotate(30,0);
-      delay(3000);
+      delay(2000);
       rotate(0,0);
       drive(0,50);
-      delay(1000);
+      delay(2000);
       setMode(6);
       // take right turn on intersection
       break;
 
 
     case 6:        // Follow line to bridge
-      //follow_line(0);
-      drive(0,50);
+          pixy.setServos(Pan_Default, 460);
+      follow_line(0);
+      //drive(0,50);
       // follow line until vector ends on aprox y=25 +/- 5
       break;
 
@@ -240,7 +246,7 @@ if ((millis() - timestamp) < (1000 / FILTER_UPDATE_RATE_HZ)) {
       break;
 
 
-    case 10:       // Drive forward to junction turn right - If intention is to get both the bridge and the hill, jump to 17 at end
+    case 40:       // Drive forward to junction turn right - If intention is to get both the bridge and the hill, jump to 17 at end
       
       follow_line(0);
       break;
@@ -429,6 +435,7 @@ void setMode(int sm) {
 
 // works
 void serial_parse() {
+    Serial.print(read);
   uint8_t j = 0;
   while (readpos != writepos) {
     read[j] = ringbuff[readpos];
@@ -535,10 +542,9 @@ void serial_parse() {
     }
   }
   else /*if(strstr(read,"p\r\n")!= NULL||strstr(read,"i\r\n")!= NULL)*/{
-    if(strstr(read, "DS") != NULL && mode >5){
-      setMode(7);
-    }
-    Serial.print(read);
+    //if(strstr(read, "DS") != NULL && mode >5&& mode <7){
+    //  setMode(7);
+    //}
   }
 
 }
@@ -599,6 +605,8 @@ void rotate(uint16_t deg, int spd) {
 // 0: horizontal
 // 1: vertical
 void follow_line(uint8_t dir) {
+  
+  
   
         //  pixy.setServos(Pan_Default, 480);
   uint8_t bestfit = 0;
@@ -662,18 +670,18 @@ void follow_line(uint8_t dir) {
   bestfit = 0;
   // drive towards center
     if(x1[bestfit] > 42 && y1[bestfit]>40){
-      drive(-30,20);
+      drive(90,30);
     }
     else if(x1[bestfit] < 36 && y1[bestfit]>40){
-      drive(30,20);
+      drive(-90,30);
     }
     else{
       if(y1[bestfit]<40){
-        drive(0,20);
+        drive(0,30);
         }
         else{ 
           if(abs(dirLocal[bestfit])>2){
-            rotate(dirLocal[bestfit],20);
+            rotate(dirLocal[bestfit],30);
           }
           else{
             rotate(0,0);
