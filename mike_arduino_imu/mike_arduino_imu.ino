@@ -97,15 +97,16 @@ void loop() {
   }
   timestamp = millis();
   //for debugging only start
+  
+  // for debugging only end
+  
   if(distance<threshold_distance){
   Serial.print("DS");
   Serial.write(distance>>2);
   Serial.print("p\r\n");
-  
+  delay(100);
   //Serial.print(distance); 
   }
-  // for debugging only end
-  
   // Read the motion sensors
   sensors_event_t accel, gyro, mag;
   accelerometer->getEvent(&accel);
