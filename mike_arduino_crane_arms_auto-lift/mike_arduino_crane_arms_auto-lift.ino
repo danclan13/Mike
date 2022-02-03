@@ -47,12 +47,15 @@ FastPID PID2(Kp, Ki, Kd, Hz, 9, true);          // Extension gear motor PID
 
 
 //Sensor
-const int hall_11 = 8; // flipped for the hoist motor
-const int hall_12 = 2; // flipped for the hoist motor
+const int hall_11 = 2; // flipped for the hoist motor
+const int hall_12 = 8; // flipped for the hoist motor
 const int hall_21 = 4;
 const int hall_22 = 12;
 unsigned long t1, t1_updated, t2, t2_updated;
 unsigned long dt1, dt2;
+unsigned long strugt1, strugt2;
+volatile boolean strugFlag1 = 0;
+volatile boolean strugFlag2 = 0;
 unsigned long braketime = 300000;
 unsigned rpm1, rpm2;
 
@@ -66,17 +69,17 @@ volatile boolean liftreport = 0;
 unsigned stepdone = 0;
 unsigned long cranetimer = 0;
 unsigned long cranetimeout = 500; // in milliseconds
-unsigned long craneout = 166;  //going to the hole forward in mm
-unsigned long hookdown = 570;  // going to the hole down in mm?
+unsigned long craneout = 162;  //going to the hole forward in mm    ~ sort of calibrated
+unsigned long hookdown = 528;  // going to the hole down in mm?    ~ sort of calibrated
 unsigned long hookbitup = 60;  // hooking up the hole in mm?
 unsigned long cranetohole = 75; // retracting the jib while lifting to this position in mm
-unsigned long hooktohole = 125; // lifting the hook while retracting to this position in mm?
-unsigned long hookfinish = 86; // finishing lifting the bridge to this position in mm?
+unsigned long hooktohole = 115; // lifting the hook while retracting to this position in mm?
+unsigned long hookfinish = 66; // finishing lifting the bridge to this position in mm?
 
 
 //Driver
-const int pwm_11 = 11; // flipped for the hoist motor
-const int pwm_12 = 10; // flipped for the hoist motor
+const int pwm_11 = 10; // flipped for the hoist motor
+const int pwm_12 = 11; // flipped for the hoist motor
 const int pwm_21 = 6;
 const int pwm_22 = 9;
 const int servo_1 = 3;
@@ -141,6 +144,7 @@ void setup()
   cpos2 = 0;
   dpos1 = 0;
   dpos2 = 0;
+  crane[0] = 1;
 
 }
 
@@ -156,13 +160,13 @@ void loop()
 
     rFlag = false;
     i2ct = micros();
+    Serial.print(stepdone);
+    Serial.print(",");
     Serial.print(crane[0]);
     Serial.print(",");
     Serial.print(crane[1]);
     Serial.print(",");
-    Serial.print(crane[2]);
-    Serial.print(",");
-    Serial.println(crane[3]);
+    Serial.println(crane[2]);
   }
 
   if ((micros() - i2ct) > i2ctimeout) // timeout for i2c signal
@@ -210,7 +214,7 @@ void loop()
   ****************************************************************/
   if (refFlag == true)
   {
-    dpos1 = crane[0];
+    liftdone = crane[0];
     lSpos = crane[1];
     rSpos = 180 - crane[2];
 
@@ -278,14 +282,65 @@ void loop()
     rpm2 = (60000000.0 / (dt2 * 700)) * sign2;
   }
 
+  /* if input << setpoint, check if its struggling
+     (not reaching setpoint in 1 sec)
+     then rest for 2 sec
+  */
+
 
   Input1 = rpm1;
+  int16_t Output1 = PID1.step(Setpoint1, Input1);
+
+
+  if (abs(rpm1) < ((abs(Setpoint1)) * 0.1)) {
+    if (strugFlag1 == 0) {
+      strugt1 = micros();
+      strugFlag1 = 1;
+    }
+    if ((micros() - strugt1) > 1000000 &&  strugFlag1 == 1) {
+      int16_t Output1 = 0;      
+      PID1.clear();
+    }
+    if ((micros() - strugt1) > 3000000 &&  strugFlag1 == 1) {
+      strugFlag1 = 0;      
+      PID1.clear();
+    }
+  }
+  else {
+    strugFlag1 = 0;
+  }
+
+
+
   Input2 = rpm2;
+  int16_t Output2 = PID2.step(Setpoint2, Input2);
+
+
+  if (abs(rpm2) < ((abs(Setpoint2)) * 0.1)) {
+    if (strugFlag2 == 0) {
+      strugt2 = micros();
+      strugFlag2 = 1;
+    }
+    if ((micros() - strugt2) > 1000000 &&  strugFlag2 == 1) {
+      int16_t Output2 = 0;
+      PID2.clear();
+    }
+    if ((micros() - strugt2) > 3000000 &&  strugFlag2 == 1) {
+      strugFlag2 = 0;
+      PID2.clear();
+    }
+  }
+  else {
+    strugFlag2 = 0;
+  }
+
+
+
 
   // get output values from PID loop
 
-  int16_t Output1 = PID1.step(Setpoint1, Input1);
-  int16_t Output2 = PID2.step(Setpoint2, Input2);
+
+
 
   motor_write(Output1, Output2);
 
@@ -351,7 +406,7 @@ void LoadBytes(void) {
     else if (i2cdata[readBufferIndex] == 242)
     {
       readBufferIndex++;
-      crane[1] = i2cdata[readBufferIndex] - 80;
+      crane[1] = i2cdata[readBufferIndex];
     }
     else if (i2cdata[readBufferIndex] == 243)
     {
@@ -380,9 +435,11 @@ void receiveEvent(int howMany) {
 
 
 void requestEvent() {
-  Wire.write("p,");
+  Wire.write(0x01);
+  Wire.write("p");
   Wire.write(liftreport);
-  Wire.write(",\r\n");
+  Wire.write("\r");
+  Wire.write("\n");
 }
 
 void interruptFunction1() {
@@ -424,14 +481,14 @@ void bridgeLifting() {
   if (liftdone != 1) {          // check if lifting required
     if (stepdone == 0) {
       dpos2 = craneout;         // on step 1 extend the crane
-      dspeed2 = 50;
+      dspeed2 = 55;
       if (cpos2 == dpos2) {
         stepdone = 1;
       }          // when step 1 is done set stepdone to '1'
     }
     else if (stepdone == 1) {
       dpos1 = hookdown;         // on step 2 lower the hook
-      dspeed1 = 45;
+      dspeed1 = 54;
       if (cpos1 == dpos1) {
         cranetimer = micros();  // when step 2 is done, start the pause timer and set stepdone to '2'
         stepdone = 2;
@@ -460,13 +517,14 @@ void bridgeLifting() {
     }
     else if (stepdone == 5) {
       dpos1 = hookfinish;         // on step 6 lift the bridge to the end
-      dspeed1 = 16;
+      dspeed1 = 20;
       if (cpos1 == dpos1) {
         stepdone = 6;
       }            // when step 6 is done, set stepdone to '6'
     }
     else if (stepdone == 6) {
       dpos1 = hooktohole;         // on step 7 release the hook
+      dspeed1 = 30;
       if (cpos1 == dpos1) {
         stepdone = 7;
       }            // when step 7 is done, set stepdone to '7'
