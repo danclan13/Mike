@@ -13,8 +13,8 @@ Adafruit_Sensor *accelerometer, *gyroscope, *magnetometer;
 
 // pick your filter! slower == better quality output
 //Adafruit_NXPSensorFusion filter; // slowest
-//Adafruit_Madgwick filter;  // faster than NXP
-Adafruit_Mahony filter;  // fastest/smalleset
+Adafruit_Madgwick filter;  // faster than NXP
+//Adafruit_Mahony filter;  // fastest/smalleset
 
 #if defined(ADAFRUIT_SENSOR_CALIBRATION_USE_EEPROM)
   Adafruit_Sensor_Calibration_EEPROM cal;
@@ -22,8 +22,8 @@ Adafruit_Mahony filter;  // fastest/smalleset
   Adafruit_Sensor_Calibration_SDFat cal;
 #endif
 
-#define FILTER_UPDATE_RATE_HZ 20
-#define PRINT_EVERY_N_UPDATES 1
+#define FILTER_UPDATE_RATE_HZ 1000
+#define PRINT_EVERY_N_UPDATES 100
 //#define AHRS_DEBUG_OUTPUT
 
 
@@ -98,9 +98,9 @@ void loop() {
   timestamp = millis();
   //for debugging only start
   if(distance<threshold_distance){
-  Serial.print("DS");
+  //Serial.print("DS");
   Serial.write(distance>>2);
-  Serial.print("p\r\n");
+  //Serial.print("p\r\n");
   
   //Serial.print(distance); 
   }
@@ -160,8 +160,8 @@ void loop() {
   //float headingN, headingW; 
   //headingN = fabs(heading);
   //headingW = 57.3*acos(sin((heading)/57.3));
-  //Serial.print("Heading:");
-  //Serial.print(heading);
+  Serial.print("Heading:");
+  Serial.println(heading);
   //Serial.print("HeadingN:");
   //Serial.print(headingN);
   //Serial.print(",HeadingW:");
@@ -170,6 +170,9 @@ void loop() {
   //Serial.print(pitch);
   //Serial.print(", Roll(x):");
   //Serial.println(roll);
+  //Serial.print(mag.magnetic.x, 4); Serial.print(", ");
+  //Serial.print(mag.magnetic.y, 4); Serial.print(", ");
+  //Serial.print(mag.magnetic.z, 4); Serial.println("");
 
 float p = pitch*0.0174533; // Phi
 float k = roll*0.0174533;  // Ksi
