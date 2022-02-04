@@ -73,16 +73,6 @@ bool lineavailable = false;
 
 
 bool greenNotFound = true;
-const char helpmenu1[] PROGMEM = "\n\tsetmode - set current mode\n\tgetmode - get current mode\nEEPROM settings\n\tP_def\n\tT_def\n\tP_lin\n\tT_lin\n\tP_tra\n\tT_tra\n\tP_rou\n\tT_rou\n\tP_but\n\tT_but\n\tspd_fst\n\tspd_slo\n\tbridge_and_hill - t/f\n";
-const char helpmenu2[] PROGMEM = "modes:\n\t0: Stop/Reset all\n\t1: Drive until intersection is between 40 and 45 on y axis\n\t";
-const char helpmenu3[] PROGMEM = "2: Drive sideways to hit button\n\t3: Drive sideways to find intersection again\n\t4: Wait for traffic light to turn green\n\t";
-const char helpmenu4[] PROGMEM = "5:Find intersection and turn right\n\t6: Follow line to bridge\n\t7: Deploy arm to retreive bridge\n\t8: Retrieve bridge\n\t";
-const char helpmenu5[] PROGMEM = "9: Drive sideways to verify bridge is up - if not jump to 17 at end\n\t10: Drive forward to junction turn right - If intention is to get both the bridge and the hill, jump to 17 at end\n\t";
-const char helpmenu6[] PROGMEM = "11: Follow path until button can be seen\n\t12: Rotate to face roundabout center, take IMU reading\n\t13: Track roundabout center\n\t14: Wait for IMU to take reading within 90° of original\n\t";
-const char helpmenu7[] PROGMEM = "15: Follow line towards button\n\t16: Press button -- End of program -> jump to 0\n\t17: Rotate 180° and follow line to junction\n\t18: take right at junction\n\t";
-const char helpmenu8[] PROGMEM = "19: If needed, rotate 180° to climb hill\n\t20: Take imu reading of angle to keep track of incline\n\t21: follow ine up hill, if rotated 180° drive backwards\n\t";
-const char helpmenu9[] PROGMEM = "22: Take IMU reading to know if on top of hill, if needed turn 180°\n\t23: Take IMU reading to know if on bottom of hill, rotate 180° if needed\n\t24: Jump to 11\n\t101: debug linemode\n\t102: debug ccc mode";
-const char *const helpmenu[] PROGMEM = {helpmenu1, helpmenu2, helpmenu3, helpmenu4, helpmenu5, helpmenu6, helpmenu7, helpmenu8, helpmenu9};
 const char string_curmode[] PROGMEM = "Current mode is: %d\n";
 const char string_WaitForLight[] PROGMEM = "Waiting for light\n";
 const char string_RED[] PROGMEM = "RED\n";
@@ -91,7 +81,7 @@ const char string_GREEN[] PROGMEM = "GREEN\n";
 
 const char string_setmode[] PROGMEM = "setmode"; 
 
-#define FILTER_UPDATE_RATE_HZ 10
+#define FILTER_UPDATE_RATE_HZ 3
 uint32_t timestamp;
 int8_t i;
 //    
@@ -107,6 +97,7 @@ void setup()
   pixy.changeProg("line");
   pixy.line.setDefaultTurn(0);
   pixy.setCameraBrightness(85); // set brightness to default
+      pixy.line.setDefaultTurn(-90);
 }
 
 void loop()
@@ -163,7 +154,7 @@ if ((millis() - timestamp) < (1000 / FILTER_UPDATE_RATE_HZ)) {
     case 1:        // Drive until intersection is between 40 and 45 on y axis
       rotate(0,0);
       drive(0,50);
-      delay(2000);
+      delay(1360);
       drive(0,0);
       setMode(2);
       
@@ -172,11 +163,16 @@ if ((millis() - timestamp) < (1000 / FILTER_UPDATE_RATE_HZ)) {
 
     case 2:        // Drive sideways to hit button
       rotate(0,0);
-      drive(90,50);
-      delay(1200);
-      drive(-90,50);
-      delay(1200);
-      drive(0,0);
+//      drive(90,50);
+//      delay(1300);
+//      drive(-90,50);
+//      delay(1300);
+//      drive(0,0);
+      rotate(30,0);
+      delay(2000);
+      rotate(-30,0);
+      delay(2000);
+      rotate(0,0);      
       setMode(4);
       // keep track of stop line to ensure hiting button
       break;
@@ -186,7 +182,6 @@ if ((millis() - timestamp) < (1000 / FILTER_UPDATE_RATE_HZ)) {
       waitForIntersection();
       // keep track of stop line/intersection and wait for intersection to be between x= 34 and x=44
 
-      pixy.line.setDefaultTurn(0);
       break;
 
 
@@ -195,6 +190,7 @@ if ((millis() - timestamp) < (1000 / FILTER_UPDATE_RATE_HZ)) {
       // change camera tilt to traffic light setpoint
       // look for red or green light
       // on green light, move forward
+          pixy.setServos(Pan_Default, Tilt_Default);
       waitForGreen();
       if (greenNotFound == false)
         setMode(5);
@@ -202,19 +198,37 @@ if ((millis() - timestamp) < (1000 / FILTER_UPDATE_RATE_HZ)) {
 
 
     case 5:        // Find intersection and turn right
-      pixy.line.setDefaultTurn(-90);
-      follow_line(0);
-      // follow line until intersection is available
+      rotate(0,0);
+      drive(0,50);
+      delay(3400);
+      drive(0,0);
+      rotate(-30,0);
+      delay(2000);
+      rotate(0,0);
+      drive(0,50);
+      delay(5000);
+      drive(0,0);
+      rotate(30,0);
+      delay(2000);
+      rotate(0,0);
+      drive(0,50);
+      delay(2000);
+      setMode(6);
       // take right turn on intersection
       break;
 
 
     case 6:        // Follow line to bridge
+          pixy.setServos(Pan_Default, 460);
+      follow_line(0);
+      //drive(0,50);
       // follow line until vector ends on aprox y=25 +/- 5
       break;
 
 
     case 7:        // Deploy arm to retreive bridge
+      //rotate(0,0);
+      //drive(0,0);
       // possibly change modes to identify hole and arm
       // if CV used to find hole, code goes here
       break;
@@ -232,10 +246,9 @@ if ((millis() - timestamp) < (1000 / FILTER_UPDATE_RATE_HZ)) {
       break;
 
 
-    case 10:       // Drive forward to junction turn right - If intention is to get both the bridge and the hill, jump to 17 at end
+    case 40:       // Drive forward to junction turn right - If intention is to get both the bridge and the hill, jump to 17 at end
       
       follow_line(0);
-        setMode(17);
       break;
 
 
@@ -270,47 +283,6 @@ if ((millis() - timestamp) < (1000 / FILTER_UPDATE_RATE_HZ)) {
       // identfy end of line
       // move until end of line is aprox Y=45
       setMode(0);
-      break;
-
-
-    case 17:       // Rotate 180° and follow line to junction
-      // wait for rotation to complete
-      // find line to follow
-      // find intersection
-      break;
-
-
-    case 18:       // take right at junction
-      // take right at itersection
-      break;
-
-
-    case 19:       // If needed, rotate 180° to climb hill
-      // do nothing
-      break;
-
-
-    case 20:       // Take imu reading of angle to keep track of incline
-      // aquire lock on line, fix rotation if needed
-      break;
-
-
-    case 21:       // follow ine up hill, if rotated 180° drive backwards
-      // track line
-      break;
-
-
-    case 22:       // Take IMU reading to know if on top of hill, if needed turn 180°
-      // do nothing
-      break;
-
-
-    case 23:       // Take IMU reading to know if on bottom of hill, rotate 180° if needed
-      // follow line
-      break;
-
-
-    case 24:       // Jump to 11
       break;
 
     case 101:      // debug line mode
@@ -463,6 +435,7 @@ void setMode(int sm) {
 
 // works
 void serial_parse() {
+    Serial.print(read);
   uint8_t j = 0;
   while (readpos != writepos) {
     read[j] = ringbuff[readpos];
@@ -490,14 +463,6 @@ void serial_parse() {
     else if (strstr(read, "getmode") != NULL | strstr(read, "Getmode") != NULL | strstr(read, "GetMode") != NULL | strstr(read, "getMode") != NULL) {
       sprintf(buf, (char *)pgm_read_word(&string_curmode), mode);
       Serial.print(buf);
-    }
-    else if (strstr(read, "help") != NULL | strstr(read, "Help") != NULL | strstr(read, "HELP") != NULL) {
-      sprintf(buf, (char *)pgm_read_word(&(string_curmode)), mode);
-      Serial.print(buf);
-      for (int i = 0; i < 9; i++) {
-        strcpy_P(buf, (char *)pgm_read_word(&(helpmenu[i])));  // Necessary casts and dereferencing, just copy.
-        Serial.print(buf);
-      }
     }
     // commands to change settings in EEPROM
     else if (strstr(read, "P_") != NULL) {
@@ -577,7 +542,9 @@ void serial_parse() {
     }
   }
   else /*if(strstr(read,"p\r\n")!= NULL||strstr(read,"i\r\n")!= NULL)*/{
-    Serial.print(read);
+    //if(strstr(read, "DS") != NULL && mode >5&& mode <7){
+    //  setMode(7);
+    //}
   }
 
 }
@@ -639,25 +606,44 @@ void rotate(uint16_t deg, int spd) {
 // 1: vertical
 void follow_line(uint8_t dir) {
   
-          pixy.setServos(Pan_Default, 480);
+  
+  
+        //  pixy.setServos(Pan_Default, 480);
   uint8_t bestfit = 0;
   int8_t dx;
   int8_t dy;
   int8_t dirLocal[20];
   int8_t x1[20];
+  int8_t y1[20];
   uint8_t DeltaDirLocal[20];
   uint8_t lowestval = 45;
   pixy.line.getAllFeatures();
+  uint8_t indexofLowest = 0;
+  uint8_t lastLowest = 0;
   for (i = 0; i < pixy.line.numVectors; i++)
   {
     if(i<=19){
       dx = pixy.line.vectors[i].m_x0 - pixy.line.vectors[i].m_x1; // get difference between x coordinates
       dy = pixy.line.vectors[i].m_y0 - pixy.line.vectors[i].m_y1; // get difference between y coordinates
+      if(pixy.line.vectors[i].m_y0>pixy.line.vectors[i].m_y1){
+        if(pixy.line.vectors[i].m_y0>lastLowest){
+          indexofLowest = i;
+          lastLowest = pixy.line.vectors[i].m_y0;
+        }
+      }
+      else{
+        if(pixy.line.vectors[i].m_y1>lastLowest){
+          indexofLowest = i;
+          lastLowest = pixy.line.vectors[i].m_y1;
+        }
+      }
       if(dy<0){
         x1[i] = pixy.line.vectors[i].m_x1;
+        y1[i] = pixy.line.vectors[i].m_y1;
       }
       else{
         x1[i] = pixy.line.vectors[i].m_x0;
+        y1[i] = pixy.line.vectors[i].m_y0;
       }
       double vLength = sqrt(pow(dx, 2) + pow(dy, 2));
       dirLocal[i] = (int8_t)(180 / 3.141592) * acos(-dx / vLength) - 90;
@@ -679,20 +665,30 @@ void follow_line(uint8_t dir) {
 //    sprintf(buf, "The best value is %d\n", (int) dirLocal[bestfit]);
 //    Serial.print(buf);
 
-    // drive towards center
-    if(x1[bestfit] > 42){
-      drive(-90,20);
+    
+  }
+  bestfit = 0;
+  // drive towards center
+    if(x1[bestfit] > 42 && y1[bestfit]>40){
+      drive(90,30);
     }
-    else if(x1[bestfit] < 36){
-      drive(90,20);
+    else if(x1[bestfit] < 36 && y1[bestfit]>40){
+      drive(-90,30);
     }
     else{
-      if(abs(dirLocal[bestfit])>2){
-        rotate(dirLocal[bestfit],20);
-      }
-      drive(dirLocal[bestfit],30);
+      if(y1[bestfit]<40){
+        drive(0,30);
+        }
+        else{ 
+          if(abs(dirLocal[bestfit])>2){
+            rotate(dirLocal[bestfit],30);
+          }
+          else{
+            rotate(0,0);
+          }
+          drive(dirLocal[bestfit],30);
+        }
     }
-  }
 }
 
 // works
