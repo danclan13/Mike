@@ -245,15 +245,37 @@ if ((millis() - timestamp) < (1000 / FILTER_UPDATE_RATE_HZ)) {
       // if vectors are misaligned jump to 17
       break;
 
-
-    case 40:       // Drive forward to junction turn right - If intention is to get both the bridge and the hill, jump to 17 at end
       
-      follow_line(0);
+    case 40:       // Drive forward to junction turn right - If intention is to get both the bridge and the hill, jump to 17 at end
+      drive(0,0);
+      rotate(30,0);
+      delay(2000);
+      drive(0,30);
+      rotate(0,0);
+      delay(5000);
+      drive(0,0);
+      rotate(-30,0);
+      delay(2000);
+      setMode(11)
+      
       break;
 
 
     case 11:       // Follow path until button can be seen
       // switch between line mode and ccc mode repeatedly until button is identified
+  setCameraMode(1); // set the camera to ccc mode and reduce brightness
+          pixy.ccc.getBlocks();
+    for (i = 0; i < pixy.ccc.numBlocks; i++)
+    {
+      // for debugging only
+      //sprintf(buf, "Block signature %d: ", i);
+      //Serial.print(buf);
+      //pixy.ccc.blocks[i].print();
+      if (pixy.ccc.blocks[i].m_signature == 1){
+        setMode(12);
+      }
+      
+    }
       break;
 
 
@@ -367,10 +389,6 @@ void waitForGreen() {
       }
       
     }
-  //if(pixy.line.barcodes[0].m_code == 14){
-  //  mode = 0;
-  //    break;
-  //}
   }
   setBrightness(0); // set brightness to default
 }

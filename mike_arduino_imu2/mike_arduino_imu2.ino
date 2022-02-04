@@ -19,7 +19,8 @@ void setup() {
 
   timestamp = millis();
 }
-int distance = 0;
+int distance1 = 0;
+int distance2 = 0;
 int threshold_distance = 600;
 
 
@@ -38,15 +39,16 @@ void loop() {
     lineavailable = false;
     serial_parse();
   }
-  distance = analogRead(A0);
+  distance1 = analogRead(A0);
+  distance2 = analogRead(A1);
   if ((millis() - timestamp) < (1000 / FILTER_UPDATE_RATE_HZ)) {
     return;
   }
   timestamp = millis();
   //for debugging only start
-  if(distance<threshold_distance){
-  Serial.print("DS");
-  Serial.write(distance>>2);
+  if(distance1<threshold_distance){
+  Serial.print("X1");
+  Serial.write(distance1>>2);
   Serial.print("p\r\n");
   
   //Serial.print(distance); 
@@ -81,9 +83,14 @@ void serial_parse() {
     if (strstr(read, "read") != NULL){
       sendLines = read[4];
     }
-    if (strstr(read, "distance") != NULL){
-      Serial.print("DS");
-      Serial.write(distance>>2);
+    if (strstr(read, "distance1") != NULL){
+      Serial.print("X1");
+      Serial.write(distance1>>2);
+      Serial.print("p\r\n");
+    }
+    if (strstr(read, "distance2") != NULL){
+      Serial.print("X2");
+      Serial.write(distance2>>2);
       Serial.print("p\r\n");
     }
   }
