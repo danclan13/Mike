@@ -47,7 +47,7 @@ int mode = 0;
 
 
 // needs to be adjusted - updated by EEPROM
-uint16_t Pan_Default = 370;
+uint16_t Pan_Default = 387;
 uint16_t Tilt_Default = 250;
 uint16_t Pan_Linemode = 370;
 uint16_t Tilt_Linemode = 485;
@@ -81,7 +81,7 @@ const char string_GREEN[] PROGMEM = "GREEN\n";
 
 const char string_setmode[] PROGMEM = "setmode"; 
 
-#define FILTER_UPDATE_RATE_HZ 3
+#define FILTER_UPDATE_RATE_HZ 10
 uint32_t timestamp;
 int8_t i;
 //    
@@ -99,7 +99,8 @@ void setup()
   pixy.setCameraBrightness(85); // set brightness to default
       pixy.line.setDefaultTurn(-90);
 }
-
+int eye_tilt = 460;
+int delay_timestamp = 0;
 void loop()
 {
   if (Serial.available()) {
@@ -126,12 +127,6 @@ if ((millis() - timestamp) < (1000 / FILTER_UPDATE_RATE_HZ)) {
     case 0:        // Stop, wait for button input, reset all parameters
       // do nothing
       // change camera tilt to line following setpoint
-          if(waitForIntersection()){
-            pixy.setLED(0,150,0);
-          }
-          else{
-            pixy.setLED(0,0,0);
-          }
           pixy.setServos(Pan_Default, 460);
       /*
       for (i = 0; i < pixy.line.numBarcodes; i++)
@@ -144,7 +139,13 @@ if ((millis() - timestamp) < (1000 / FILTER_UPDATE_RATE_HZ)) {
           pixy.setServos(Pan_Default, Tilt_Linemode);
       }
     }*/
-      
+      pixy.ccc.getBlocks();
+    for (i = 0; i < pixy.ccc.numBlocks; i++)
+    {
+      if (pixy.ccc.blocks[i].m_signature == 3) {
+        setMode(1);
+      }
+    }
       greenNotFound = true;
       drive(0,0);
       rotate(0,0);
@@ -169,9 +170,9 @@ if ((millis() - timestamp) < (1000 / FILTER_UPDATE_RATE_HZ)) {
 //      delay(1300);
 //      drive(0,0);
       rotate(30,0);
-      delay(2000);
+      delay(1500);
       rotate(-30,0);
-      delay(2000);
+      delay(1500);
       rotate(0,0);      
       setMode(4);
       // keep track of stop line to ensure hiting button
@@ -220,8 +221,10 @@ if ((millis() - timestamp) < (1000 / FILTER_UPDATE_RATE_HZ)) {
 
     case 6:        // Follow line to bridge
           pixy.setServos(Pan_Default, 460);
-      follow_line(0);
+      //center_line();
       //drive(0,50);
+      
+      follow_line(0);
       // follow line until vector ends on aprox y=25 +/- 5
       break;
 
@@ -235,6 +238,11 @@ if ((millis() - timestamp) < (1000 / FILTER_UPDATE_RATE_HZ)) {
 
 
     case 8:        // Retrieve bridge
+      
+          pixy.setServos(Pan_Default, eye_tilt);
+          if(eye_tilt>0){
+            eye_tilt = eye_tilt-6; 
+          }
       // do nothing
       break;
 
@@ -246,67 +254,154 @@ if ((millis() - timestamp) < (1000 / FILTER_UPDATE_RATE_HZ)) {
       break;
 
       
-    case 40:       // Drive forward to junction turn right - If intention is to get both the bridge and the hill, jump to 17 at end
+    case 44:       // Drive forward to junction turn right - If intention is to get both the bridge and the hill, jump to 17 at end
       drive(0,0);
       rotate(30,0);
-      delay(2000);
-      drive(0,30);
+      delay(2200);
+      drive(-30,60);
       rotate(0,0);
       delay(5000);
       drive(0,0);
       rotate(-30,0);
-      delay(2000);
-      setMode(11)
+      delay(2200);
+      drive(0,0);
+      rotate(0,0);
+      setMode(11);
       
       break;
 
 
     case 11:       // Follow path until button can be seen
       // switch between line mode and ccc mode repeatedly until button is identified
-  setCameraMode(1); // set the camera to ccc mode and reduce brightness
-          pixy.ccc.getBlocks();
-    for (i = 0; i < pixy.ccc.numBlocks; i++)
-    {
-      // for debugging only
-      //sprintf(buf, "Block signature %d: ", i);
-      //Serial.print(buf);
-      //pixy.ccc.blocks[i].print();
-      if (pixy.ccc.blocks[i].m_signature == 1){
+      if(waitForIntersection()==false){
+        follow_line(0);
+      }
+      else{
         setMode(12);
       }
       
-    }
+    
       break;
 
 
     case 12:       // Rotate to face roundabout center, take IMU reading
+      delay(4000);
+      drive(0,0);
+      drive(0,0);
+      //rotate(-30,0);
+      //delay(2900);
+      drive(-25,30);
+      rotate(0,0);
+      delay(3*2000);
+      drive(0,0);
+      rotate(30,0);
+      delay(1000);
+      drive(0,30);
+      rotate(0,0);
+      delay(2500);
+      setMode(13);
       // switch to ccc mode
       // keep roundabout centered
       break;
 
 
     case 13:       // Track roundabout center
-      // track roundabout center
+      // track roundabout center0
+      delay(5000);
+      delay(5000);
+      delay(5000);
+      delay(5000);
+      delay(2000);
+      delay_timestamp = millis();
+      setMode(14);
+      /*
+      while( true){
+        
+      setCameraMode(1); // set the camera to ccc mode and reduce brightness
+          pixy.ccc.getBlocks();
+      for (i = 0; i < pixy.ccc.numBlocks; i++)
+      {
+        // for debugging only
+        //sprintf(buf, "Block signature %d: ", i);
+        //Serial.print(buf);
+        //pixy.ccc.blocks[i].print();
+        if (pixy.ccc.blocks[i].m_signature == 1){
+          setMode(15);
+          break;
+        }
+      }
+      
+      }*/
       // issue turn commands when roundabout center has moved 25% of frame width
       break;
 
 
     case 14:       // Wait for IMU to take reading within 90° of original
       // same as cases 13
+      follow_line(0);
       break;
 
 
     case 15:       // Follow line towards button
+    
+      drive(0,30);
+      rotate(0,0);
+      drive(0,30);
+      rotate(0,0);
+      delay(3500);
+      drive(0,0);
+      rotate(0,0);
+      drive(180,30);
+      rotate(0,0);
+      delay(200);
+      drive(0,0);
+      rotate(30,0);
+      delay(2000);
+      drive(0,0);
+      rotate(0,0);
+      setMode(17);
       // rotate 90° and find vector to follow towards button
       break;
 
-
-    case 16:       // Press button -- End of program -> jump to 0
+    // press button first time
+    case 17:
+      rotate(-30,0);
+      delay(4000);
+      rotate(0,0);
+      setMode(18);
+      break;
+     
+      //press button second time
+    case 18:
+      delay(2000);
+      drive(0,0);
+      rotate(-30,0);
+      delay(2000);
+      drive(0,0);
+      rotate(-30,0);
+      delay(2000);
+      drive(0,0);
+      rotate(-30,0);
+      delay(2000);
+      setMode(0);
+      break;
+      // mode 16
+    case 26:       // Press button -- End of program -> jump to 0
       // identfy end of line
       // move until end of line is aprox Y=45
       setMode(0);
       break;
 
+    case 50:      // debug line mode
+      center_line();
+      break;
+      
+    case 60:      // debug line mode
+      
+      drive(-90,40);
+      rotate(0,-60);
+      break;
+      
     case 101:      // debug line mode
       debug_line();
       break;
@@ -559,11 +654,21 @@ void serial_parse() {
       readval = eeprom_write16(ADDR_SPD_SLO, val);
     }
   }
-  else /*if(strstr(read,"p\r\n")!= NULL||strstr(read,"i\r\n")!= NULL)*/{
-    //if(strstr(read, "DS") != NULL && mode >5&& mode <7){
-    //  setMode(7);
-    //}
+  else if(mode == 6){
+    if(strstr(read,"p\r\n")!= NULL){
+    if(strstr(read, "X") != NULL && mode >5&& mode <7){
+      int count = 0;
+      while( read[count] =! 'X'){
+        count++;
+      }
+      if(read[count+2]<150 && read[count+2]>20){
+        setMode(7); 
+      }
+    }
   }
+  }
+  
+  
 
 }
 
@@ -618,12 +723,8 @@ void rotate(uint16_t deg, int spd) {
 //  sprintf(buf, "Driving to %d° at %d speed\n", deg, spd);
 //  Serial.print(buf);
 }
-
-// works
-// 0: horizontal
-// 1: vertical
-void follow_line(uint8_t dir) {
-  
+void center_line() {
+  int dir = 0;
   
   
         //  pixy.setServos(Pan_Default, 480);
@@ -688,14 +789,98 @@ void follow_line(uint8_t dir) {
   bestfit = 0;
   // drive towards center
     if(x1[bestfit] > 42 && y1[bestfit]>40){
-      drive(90,30);
+      drive(-90,30);
+    //  Serial.print ("right");
     }
     else if(x1[bestfit] < 36 && y1[bestfit]>40){
+      drive(90,30);
+    //  Serial.print ("left");
+    }
+}
+// works
+// 0: horizontal
+// 1: vertical
+void follow_line(uint8_t dir) {
+  
+  
+  
+        //  pixy.setServos(Pan_Default, 480);
+  uint8_t bestfit = 0;
+  int8_t dx;
+  int8_t dy;
+  int8_t dirLocal[20];
+  int8_t x1[20];
+  int8_t y1[20];
+  uint8_t DeltaDirLocal[20];
+  uint8_t lowestval = 45;
+  pixy.line.getAllFeatures();
+  uint8_t indexofLowest = 0;
+  uint8_t lastLowest = 0;
+  for (i = 0; i < pixy.line.numVectors; i++)
+  {
+    if(i<=19){
+      dx = pixy.line.vectors[i].m_x0 - pixy.line.vectors[i].m_x1; // get difference between x coordinates
+      dy = pixy.line.vectors[i].m_y0 - pixy.line.vectors[i].m_y1; // get difference between y coordinates
+      if(pixy.line.vectors[i].m_y0>pixy.line.vectors[i].m_y1){
+        if(pixy.line.vectors[i].m_y0>lastLowest){
+          indexofLowest = i;
+          lastLowest = pixy.line.vectors[i].m_y0;
+        }
+      }
+      else{
+        if(pixy.line.vectors[i].m_y1>lastLowest){
+          indexofLowest = i;
+          lastLowest = pixy.line.vectors[i].m_y1;
+        }
+      }
+      if(dy<0){
+        x1[i] = pixy.line.vectors[i].m_x1;
+        y1[i] = pixy.line.vectors[i].m_y1;
+      }
+      else{
+        x1[i] = pixy.line.vectors[i].m_x0;
+        y1[i] = pixy.line.vectors[i].m_y0;
+      }
+      double vLength = sqrt(pow(dx, 2) + pow(dy, 2));
+      dirLocal[i] = (int8_t)(180 / 3.141592) * acos(-dx / vLength) - 90;
+//      sprintf(buf, "angle %d: %d %d %d\n", i, (int)dirLocal[i], dx, dy);
+//      Serial.print(buf);
+      if (dir == 0) {
+        DeltaDirLocal[i] = 90 - abs(dirLocal[i]);
+        if (lowestval > (int) DeltaDirLocal[i]) {
+          bestfit = i;
+        }
+      }
+      else {
+        DeltaDirLocal[i] = abs(dirLocal[i]);
+        if (lowestval > (int) DeltaDirLocal[i]) {
+          bestfit = i;
+        }
+      }
+    }
+    else if(mode == 14){
+      
+      
+    }
+//    sprintf(buf, "The best value is %d\n", (int) dirLocal[bestfit]);
+//    Serial.print(buf);
+
+    
+  }
+  bestfit = 0;
+  // drive towards center
+    if(x1[bestfit] > 42 && y1[bestfit]>40){
       drive(-90,30);
+    }
+    else if(x1[bestfit] < 36 && y1[bestfit]>40){
+      drive(90,30);
     }
     else{
       if(y1[bestfit]<40){
         drive(0,30);
+        if(mode == 14){
+          setMode(15); 
+        }
         }
         else{ 
           if(abs(dirLocal[bestfit])>2){
